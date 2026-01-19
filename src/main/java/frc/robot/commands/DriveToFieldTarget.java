@@ -74,10 +74,11 @@ public class DriveToFieldTarget extends Command {
     );
     
     //TUNE ALL THE CONSTANTS FOR PATH CONSTRAINTS!!!!!!!
-    Command pathfindCommand = AutoBuilder.pathfindToPose(targetPose2d, new PathConstraints(3,4, Units.degreesToRadians(540), Units.degreesToRadians(720)), 0);
+    //Type Casting AutoBuilder.pathfindToPose to PathfindingCommand
+    pathfindingCommand = (PathfindingCommand) AutoBuilder.pathfindToPose(targetPose2d, new PathConstraints(swerveSubsystem.getSwerveDrive().getMaximumChassisVelocity(),4.5, swerveSubsystem.getSwerveDrive().getMaximumChassisAngularVelocity(), Units.degreesToRadians(720)), 0);
     
     //Pathfinding Command
-    CommandScheduler.getInstance().schedule(pathfindCommand);
+    CommandScheduler.getInstance().schedule(pathfindingCommand);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
