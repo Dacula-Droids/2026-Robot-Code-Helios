@@ -16,10 +16,13 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 
 import edu.wpi.first.wpilibj.Filesystem;
@@ -97,6 +100,8 @@ public class SwerveSubsystem extends SubsystemBase {
   return swerveDrive.getOdometryHeading();
   } 
 
+
+
   private void setupPathPlanner() {
     // Load the RobotConfig from the GUI settings. You should probably
     // store this in your Constants file
@@ -168,6 +173,15 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    //FUSES VISION AND SWERVE TO RUN ALL THE TIME WHEN RUNNING THE COMMAND, OR ELSE VISION WILL ONLY RUN ONCE EVERYTIME THE COMMAND IS CALLED
+    if(visionSubsystem.hasValidTarget()){
+      visionSubsystem.updateStdDevs();
+      Pose2d pose = visionSubsystem.getEstimatedPose();
+      Matrix<N3, N1> stdDevs = visionSubsystem.getCurrentStdDevs();
+      double timestamp = visionSubsystem.getTimestamp();
+      swerveDrive.addVisionMeasurement(pose, timestamp, stdDevs);
+        }
+    }
     // This method will be called once per scheduler run
   }
-}
+
