@@ -37,6 +37,10 @@ public class SwerveSubsystem extends SubsystemBase {
   public static SwerveSubsystem getInstance(){
     return INSTANCE;
   }
+
+  VisionSubsystem visionSubsystem = VisionSubsystem.getInstance();
+
+  
   File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
   SwerveDrive swerveDrive;
 
