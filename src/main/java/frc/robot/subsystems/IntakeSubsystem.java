@@ -32,7 +32,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakeSubsystem extends SubsystemBase {
   /** Creates a new IntakeSubsystem. */
+  private static IntakeSubsystem INSTANCE = new IntakeSubsystem();
+
+  public static IntakeSubsystem getInstance(){
+    return INSTANCE;
+  }
+
+
  // private SparkMax intakeMotor = new SparkMax(1, MotorType.kBrushless);
+
 
  //Motors
  private TalonFX intakeMotor = new TalonFX(1, "rio");
