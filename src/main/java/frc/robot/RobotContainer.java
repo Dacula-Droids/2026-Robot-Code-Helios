@@ -4,10 +4,15 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.SwerveSubsystem;
+import swervelib.SwerveInputStream;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -17,8 +22,17 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+  private final SwerveSubsystem swerveSubsystem = SwerveSubsystem.getInstance();
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
+  private final CommandXboxController driverXbox = new CommandXboxController(OperatorConstants.kDriverControllerPort);
+
+  SwerveInputStream driveAngularVelocity = SwerveInputStream.of(swerveSubsystem.getSwerveDrive(),
+      () -> -driverXbox.getLeftY(),
+      () -> -driverXbox.getLeftX())
+      .withControllerRotationAxis(() -> -driverXbox.getRightX())
+      .deadband(OperatorConstants.kSwerveControllerDeadband)
+      .scaleTranslation(0.3).scaleRotation(0.3)
+      .allianceRelativeControl(false);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -36,7 +50,14 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-   
+    Command driveFieldOrientedAnglularVelocity = swerveSubsystem.driveFieldOriented(driveAngularVelocity);
+    driverXbox.b().onTrue(Commands.runOnce(() -> swerveSubsystem.zeroFieldOrientedHeading(driveAngularVelocity), swerveSubsystem));
+    swerveSubsystem.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+
+    if (Robot.isSimulation()) {
+      driverXbox.a().onTrue(
+          Commands.runOnce(() -> swerveSubsystem.swerveDrive.resetOdometry(new Pose2d(7.6, 1.178, new Rotation2d()))));
+    }
   }
 
   /**
