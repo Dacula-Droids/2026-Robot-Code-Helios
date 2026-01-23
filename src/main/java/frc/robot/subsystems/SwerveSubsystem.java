@@ -132,8 +132,27 @@ public class SwerveSubsystem extends SubsystemBase {
     PathfindingCommand.warmupCommand().schedule();
   }
 
+  public void driveFieldOriented(ChassisSpeeds velocity) {
+    swerveDrive.driveFieldOriented(velocity);
+  }
+
+  /**
+   * Drive the robot given a chassis field oriented velocity.
+   *
+   * @param velocity Velocity according to the field.
+   */
+  public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
+    return run(() -> {
+      swerveDrive.driveFieldOriented(velocity.get());
+    });
+  }
+
   public void zeroGyro(){
     swerveDrive.zeroGyro();
+  }
+  
+  public void zeroFieldOrientedHeading(SwerveInputStream swerveInputStream){
+    swerveInputStream.translationHeadingOffset(true).translationHeadingOffset(swerveDrive.getOdometryHeading());
   }
 
   @Override
