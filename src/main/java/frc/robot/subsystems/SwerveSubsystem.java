@@ -26,6 +26,28 @@ import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 
 public class SwerveSubsystem extends SubsystemBase {
+  /**
+   * The Singleton instance of this SwerveSubsystem. Code should use
+   * the {@link #getInstance()} method to get the single instance (rather
+   * than trying to construct an instance of this class.)
+   */
+  private static SwerveSubsystem INSTANCE;
+  public final SwerveDrive swerveDrive;
+  public final SwerveController swerveController;
+
+  /**
+   * Returns the Singleton instance of this SwerveSubsystem. This static method
+   * should be used, rather than the constructor, to get the single instance
+   * of this class. For example: {@code SwerveSubsystem.getInstance();}
+   */
+  @SuppressWarnings("WeakerAccess")
+  public static SwerveSubsystem getInstance() {
+    if (INSTANCE == null) {
+      INSTANCE = new SwerveSubsystem();
+    }
+    return INSTANCE;
+  }
+
   /** Creates a new SwerveSubsystem. */
   public SwerveSubsystem() {}
 
