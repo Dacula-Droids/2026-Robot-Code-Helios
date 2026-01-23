@@ -49,7 +49,25 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /** Creates a new SwerveSubsystem. */
-  public SwerveSubsystem() {}
+  public SwerveSubsystem() {
+    SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
+    try {
+      swerveDrive = new SwerveParser(new File(Filesystem.getDeployDirectory(), "KrakenMk4iSwerveConfig")).createSwerveDrive(PhysicalConstants.kMaxSpeed.magnitude());
+      swerveController = swerveDrive.getSwerveController();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
+    swerveDrive.setCosineCompensator(false); //!SwerveDriveTelemetry.isSimulation) Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
+    //swerveDrive.pushOffsetsToEncoders();
+    zeroGyro();
+  }
+  public SwerveDrive getSwerveDrive() {
+    return swerveDrive;
+  }
+  public void zeroGyro(){
+    swerveDrive.zeroGyro();
+  }
 
   @Override
   public void periodic() {
