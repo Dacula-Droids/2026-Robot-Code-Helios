@@ -31,9 +31,9 @@ public class RobotContainer {
       () -> -driverXbox.getLeftX())
       .withControllerRotationAxis(() -> -driverXbox.getRightX())
       .deadband(OperatorConstants.kSwerveControllerDeadband)
-      .scaleTranslation(0.3).scaleRotation(0.3)
+      .scaleTranslation(0.75).scaleRotation(0.5)
       .allianceRelativeControl(false);
-
+  SwerveInputStream driveRobotOrientedAngularVelocity = driveAngularVelocity.copy().robotRelative(true);
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
@@ -51,8 +51,10 @@ public class RobotContainer {
    */
   private void configureBindings() {
     Command driveFieldOrientedAnglularVelocity = swerveSubsystem.driveFieldOriented(driveAngularVelocity);
+    Command driveRobotOrientedAnglularVelocity = swerveSubsystem.driveFieldOriented(driveRobotOrientedAngularVelocity);
     driverXbox.b().onTrue(Commands.runOnce(() -> swerveSubsystem.zeroFieldOrientedHeading(driveAngularVelocity), swerveSubsystem));
-    swerveSubsystem.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+    //swerveSubsystem.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+    swerveSubsystem.setDefaultCommand(driveRobotOrientedAnglularVelocity);
 
     if (Robot.isSimulation()) {
       driverXbox.a().onTrue(
