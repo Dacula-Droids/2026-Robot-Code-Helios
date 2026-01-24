@@ -31,7 +31,7 @@ public class RobotContainer {
       () -> -driverXbox.getLeftX())
       .withControllerRotationAxis(() -> -driverXbox.getRightX())
       .deadband(OperatorConstants.kSwerveControllerDeadband)
-      .scaleTranslation(0.75).scaleRotation(0.5)
+      .scaleTranslation(0.15).scaleRotation(0.15)
       .allianceRelativeControl(false);
   SwerveInputStream driveRobotOrientedAngularVelocity = driveAngularVelocity.copy().robotRelative(true);
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
