@@ -18,10 +18,39 @@ import edu.wpi.first.units.measure.LinearVelocity;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kArmControllerPort = 1;
     public static final double kSwerveControllerDeadband = 0.3;
   }
 
   public static class PhysicalConstants {
     public static final LinearVelocity kMaxSpeed = Units.MetersPerSecond.of(4.5);
   }
+
+  public static class ArmConstants{
+
+    public static final int kIntakeMotorId  = 20;
+    public static final int kEndEffectorMotorId = 21;
+    //Change these values later
+    public static final double forwardSoftLimit = 10.2;
+    public static final double reverseSoftLimit  = 2;
+
+    public static final double intakeMotorSpeed = 0.8;
+
+    public static final double endEffectorTolerance = 2; 
+
+    public static final double outakeMotorSpeed = 0.3;
+  }
+
+  public static class ShooterConstants{
+    public static final int kShooterMotorId = 8;
+    public static final int kOutakeMotorId = 9;
+
+
+    public static final double shootingOutakeMotorSpeed = 0.7;
+    public static final double kShooterForwardSoftLimit = 10;
+    public static final double kShooterBackwardSoftLimit = 1;
+    public static final double kShooterSuctionLevel = 2;
+  }
+  
 }
+
