@@ -15,16 +15,18 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.Units;
+
 
 /** Add your docs here. */
 public final class Constants {
   public static class DriveConstants{
-    public final static double MAXIMUM_SPEED = Units.feetToMeters(4.5);
+  
   }
   public static class OperatorConstants{
     public final static int DRIVER_CONTROLLER_PORT = 1;
-    public final static int MECHANISM_CONTROLLER_PORT = 2;
+    public final static int buttonBoardPort = 2;
     public final static double SWERVE_DEADBAND = 0.3;
   }
   public static class LocalizationConstants{
@@ -44,4 +46,9 @@ public final class Constants {
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5,0.5,1);
     public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   }
+
+   public static class PhysicalConstants {
+    public static final LinearVelocity kMaxSpeed = Units.MetersPerSecond.of(4.5);
+  }
 }
+
