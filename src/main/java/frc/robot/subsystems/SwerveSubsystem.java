@@ -147,25 +147,43 @@ public class SwerveSubsystem extends SubsystemBase {
 
     // Preload PathPlanner Path finding
     // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
-    //PathfindingCommand.warmupCommand().schedule(); - Deprecated
-    CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+    PathfindingCommand.warmupCommand().schedule();
   }
 
-  public Command getAutonomousCommand(String pathName){
-    return new PathPlannerAuto(pathName);
+  public void driveFieldOriented(ChassisSpeeds velocity) {
+    swerveDrive.driveFieldOriented(velocity);
+  }
+
+  public Command pathFindToFieldTarget(FieldTarget fieldTarget, boolean isOffset) {
+    Pose3d tagPose = fieldTarget.getTargetPose();
+    Transform3d offset = frc.robot.field.FieldConstants.getFieldTargetOffset(fieldTarget, isOffset);
+    Pose2d goalPose = tagPose.plus(offset).toPose2d();
+    return driveToPose(goalPose);
+  }
+
+  /**
+   * Drive the robot given a chassis field oriented velocity.
+   *
+   * @param velocity Velocity according to the field.
+   */
+  public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
+    return run(() -> {
+      swerveDrive.driveFieldOriented(velocity.get());
+    });
+  }
+
+  public void zeroGyro() {
+    swerveDrive.zeroGyro();
+  }
+
+  public void zeroFieldOrientedHeading(SwerveInputStream swerveInputStream) {
+    swerveInputStream.translationHeadingOffset(true).translationHeadingOffset(swerveDrive.getOdometryHeading());
   }
 
   @Override
   public void periodic() {
-    //FUSES VISION AND SWERVE TO RUN ALL THE TIME WHEN RUNNING THE COMMAND, OR ELSE VISION WILL ONLY RUN ONCE EVERYTIME THE COMMAND IS CALLED
-    if(visionSubsystem.hasValidTarget()){
-      visionSubsystem.updateStdDevs();
-      Pose2d pose = visionSubsystem.getEstimatedPose();
-      Matrix<N3, N1> stdDevs = visionSubsystem.getCurrentStdDevs();
-      double timestamp = visionSubsystem.getTimestamp();
-      swerveDrive.addVisionMeasurement(pose, timestamp, stdDevs);
-        }
-    }
+    LimelightHelpers.PoseEstimate limelightEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+
     // This method will be called once per scheduler run
   }
-
+}
