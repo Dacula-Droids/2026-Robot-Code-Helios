@@ -4,103 +4,87 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Meter;
-
 import java.io.File;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.LimelightHelpers;
+import frc.robot.Constants.PhysicalConstants;
+import frc.robot.Utils.FieldTarget;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
+import swervelib.SwerveInputStream;
 import swervelib.parser.SwerveParser;
+import swervelib.telemetry.SwerveDriveTelemetry;
 
 public class SwerveSubsystem extends SubsystemBase {
-  /** Creates a new SwerveSubsystem. */
-  private static SwerveSubsystem INSTANCE = new SwerveSubsystem();
-  public static SwerveSubsystem getInstance(){
+  /**
+   * The Singleton instance of this SwerveSubsystem. Code should use
+   * the {@link #getInstance()} method to get the single instance (rather
+   * than trying to construct an instance of this class.)
+   */
+  private static SwerveSubsystem INSTANCE;
+  public final SwerveDrive swerveDrive;
+  public final SwerveController swerveController;
+
+  /**
+   * Returns the Singleton instance of this SwerveSubsystem. This static method
+   * should be used, rather than the constructor, to get the single instance
+   * of this class. For example: {@code SwerveSubsystem.getInstance();}
+   */
+  @SuppressWarnings("WeakerAccess")
+  public static SwerveSubsystem getInstance() {
+    if (INSTANCE == null) {
+      INSTANCE = new SwerveSubsystem();
+    }
     return INSTANCE;
   }
 
-  VisionSubsystem visionSubsystem = VisionSubsystem.getInstance();
-
-  
-  File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
-  SwerveDrive swerveDrive;
-
-
+  /** Creates a new SwerveSubsystem. */
   public SwerveSubsystem() {
-  try {
-    swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(Constants.DriveConstants.MAXIMUM_SPEED, new Pose2d(new Translation2d(Meter.of(1), Meter.of(4)), Rotation2d.fromDegrees(0)));
-  } catch (Exception e)
-  {
-    throw new RuntimeException();
-  }
-
-   SwerveController swerveController = swerveDrive.getSwerveController();
-    ZeroGyro();
+    SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
+    try {
+      swerveDrive = new SwerveParser(new File(Filesystem.getDeployDirectory(), "KrakenMk4iSwerveConfig"))
+          .createSwerveDrive(PhysicalConstants.kMaxSpeed.magnitude());
+      swerveController = swerveDrive.getSwerveController();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via
+                                             // angle.
+    swerveDrive.setCosineCompensator(false); // !SwerveDriveTelemetry.isSimulation) Disables cosine compensation for
+                                             // simulations since it causes discrepancies not seen in real life.
+    // swerveDrive.pushOffsetsToEncoders();
+    zeroGyro();
     setupPathPlanner();
- 
-  }
-  //Low-Level Control, only works when called
-  public void driveFieldOriented(ChassisSpeeds velocity){
-  swerveDrive.driveFieldOriented(velocity);
   }
 
-  //Works everytime called, 20ms
-  public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity){
-    return run(() -> {
-      swerveDrive.driveFieldOriented(velocity.get());
-    });
+  public SwerveDrive getSwerveDrive() {
+    return swerveDrive;
   }
 
-  public void drive(ChassisSpeeds velocity){
-    swerveDrive.drive(velocity);
+  public Command driveToPose(Pose2d pose) {
+    PathConstraints pathConstraints = new PathConstraints(3, 3,
+        Units.degreesToRadians(540),
+        Units.degreesToRadians(720));
+
+    return AutoBuilder.pathfindToPose(pose, pathConstraints, 0);
   }
-
-  public Command drive(Supplier<ChassisSpeeds> velocity){
-    return run(() -> {
-      swerveDrive.drive(velocity.get());
-    });
-  }
-
-
-  public SwerveDrive getSwerveDrive(){
-  return swerveDrive;
-  }
-
-  public Pose2d getPose(){
-    return swerveDrive.getPose();
-  }
-  
-  public void ZeroGyro(){
-    swerveDrive.zeroGyro();
-  }
-
-  public Rotation2d getOdometryHeading(){
-  return swerveDrive.getOdometryHeading();
-  } 
-
-
 
   private void setupPathPlanner() {
     // Load the RobotConfig from the GUI settings. You should probably
