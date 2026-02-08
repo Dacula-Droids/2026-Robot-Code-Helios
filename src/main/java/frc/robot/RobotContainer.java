@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 
@@ -23,8 +24,10 @@ import swervelib.SwerveInputStream;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem swerveSubsystem = SwerveSubsystem.getInstance();
+  private final IntakeSubsystem intakeSubsystem = IntakeSubsystem.getInstance();
 
   private final CommandXboxController driverXbox = new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  private final CommandXboxController mechanismXbox = new CommandXboxController(OperatorConstants.kMechanismControllerPort);
 
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(swerveSubsystem.getSwerveDrive(),
       () -> -driverXbox.getLeftY(),
@@ -60,6 +63,11 @@ public class RobotContainer {
       driverXbox.a().onTrue(
           Commands.runOnce(() -> swerveSubsystem.swerveDrive.resetOdometry(new Pose2d(7.6, 1.178, new Rotation2d()))));
     }
+
+    mechanismXbox.a().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.INTAKING));
+    mechanismXbox.b().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.HOLDING));
+    mechanismXbox.y().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.OUTTAKING));
+    mechanismXbox.x().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.STOWED));
   }
 
   /**
