@@ -24,4 +24,9 @@ public final class Constants {
   public static class PhysicalConstants {
     public static final LinearVelocity kMaxSpeed = Units.MetersPerSecond.of(4.5);
   }
+
+  public static class IntakeConstants{
+    public static final int intakeMotorID = 1;
+    public static final int pivotMotorID = 2;
+  }
 }
