@@ -22,6 +22,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kMechanismControllerPort = 1;
     public static final double kSwerveControllerDeadband = 0.3;
   }
 
@@ -32,5 +33,7 @@ public final class Constants {
   public static class IntakeConstants {
     public static final int intakeMotorID = 1;
     public static final int pivotMotorID = 2;
+    public static final double intakePivotGearRatio = 25; // 25:1 Gear Ratio
+    public static final double intakeRollerGearRatio = 6.0 / 7.0; // 6:7 Gear Ratio
   }
 }
