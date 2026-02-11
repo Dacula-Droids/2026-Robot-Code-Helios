@@ -16,6 +16,7 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -27,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Utils.IntakeState;
-import frc.robot.Utils.Preset;
+import frc.robot.Utils.IntakePreset;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 import yams.gearing.GearBox;
@@ -42,8 +43,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 
 public class IntakeSubsystem extends SubsystemBase {
   private static IntakeSubsystem INSTANCE;
-  private TalonFX rollerMotor = new TalonFX(Constants.IntakeConstants.intakeMotorID, "rio");
-  private TalonFX pivotMotor = new TalonFX(Constants.IntakeConstants.pivotMotorID, "rio");
+  private TalonFX rollerMotor = new TalonFX(Constants.IntakeConstants.intakeMotorID, CANBus.roboRIO());
+  private TalonFX pivotMotor = new TalonFX(Constants.IntakeConstants.pivotMotorID, CANBus.roboRIO());
 
   @SuppressWarnings("WeakerAccess")
   public static IntakeSubsystem getInstance() {
@@ -75,10 +76,11 @@ public class IntakeSubsystem extends SubsystemBase {
       pivotSmcConfig);
 
   private PivotConfig pivotConfig = new PivotConfig(pivotSmartMotorController)
-      .withSoftLimits(Preset.Intake.position, Preset.Stowed.position)
-      .withHardLimit(Preset.Intake.position, Preset.Stowed.position)
-      .withStartingPosition(Preset.Stowed.position)
-      .withTelemetry("Intake Pivot", TelemetryVerbosity.HIGH);
+      .withSoftLimits(IntakePreset.Intake.position, IntakePreset.Stowed.position)
+      .withHardLimit(IntakePreset.Intake.position, IntakePreset.Stowed.position)
+      .withStartingPosition(IntakePreset.Stowed.position)
+      .withTelemetry("Intake Pivot", TelemetryVerbosity.HIGH)
+      .withMOI(Constants.IntakeConstants.intakeCenterOfMassFromPivot, Constants.IntakeConstants.intakeMass);
 
   private Pivot intakePivot = new Pivot(pivotConfig);
 

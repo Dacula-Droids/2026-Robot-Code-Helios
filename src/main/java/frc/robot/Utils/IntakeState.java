@@ -7,19 +7,19 @@ import edu.wpi.first.units.measure.AngularVelocity;
 
 public enum IntakeState {
     STOWED(
-            Preset.Stowed.position,
+            IntakePreset.Stowed.position,
             RPM.of(0)),
 
     INTAKING(
-            Preset.Intake.position,
+            IntakePreset.Intake.position,
             RPM.of(600)),
 
     HOLDING(
-            Preset.Intake.position,
+            IntakePreset.Intake.position,
             RPM.of(150)),
 
     OUTTAKING(
-            Preset.Intake.position,
+            IntakePreset.Intake.position,
             RPM.of(-600));
 
     public final Angle PivotAngle;

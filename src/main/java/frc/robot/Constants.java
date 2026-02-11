@@ -5,7 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Mass;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -35,5 +37,7 @@ public final class Constants {
     public static final int pivotMotorID = 2;
     public static final double intakePivotGearRatio = 25; // 25:1 Gear Ratio
     public static final double intakeRollerGearRatio = 6.0 / 7.0; // 6:7 Gear Ratio
+    public static final Mass intakeMass = Units.Pounds.of(8.7342717); // 8.7342717 lbs
+    public static final Distance intakeCenterOfMassFromPivot = Units.Inches.of(9);
   }
 }

@@ -4,14 +4,14 @@ import static edu.wpi.first.units.Units.Degrees;
 
 import edu.wpi.first.units.measure.Angle;
 
-public enum Preset {
+public enum IntakePreset {
     Intake(Degrees.of(-20)),
-    Stowed(Degrees.of(10)),
-    Shooting(Degrees.of(28.6));
+    Stowed(Degrees.of(10));
+    
 
     public final Angle position;
 
-    private Preset(Angle position) {
+    private IntakePreset(Angle position) {
         this.position = position;
     }
 
