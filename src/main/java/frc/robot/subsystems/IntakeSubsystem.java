@@ -16,14 +16,21 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import swervelib.simulation.ironmaple.simulation.IntakeSimulation;
+
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.swerve.SimSwerveDrivetrain;
+import com.fasterxml.jackson.annotation.JsonGetter;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -40,11 +47,15 @@ import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import lombok.Getter;
 
 public class IntakeSubsystem extends SubsystemBase {
   private static IntakeSubsystem INSTANCE;
   private TalonFX rollerMotor = new TalonFX(Constants.IntakeConstants.intakeMotorID, CANBus.roboRIO());
   private TalonFX pivotMotor = new TalonFX(Constants.IntakeConstants.pivotMotorID, CANBus.roboRIO());
+
+  @Getter
+  private final IntakeSimulation intakeSim;
 
   @SuppressWarnings("WeakerAccess")
   public static IntakeSubsystem getInstance() {
@@ -157,17 +168,34 @@ public class IntakeSubsystem extends SubsystemBase {
 
   // Important Command to Set "State"
   public Command setState(IntakeState state) {
-    return this.runOnce(() -> {
-      setPivotSetpoint(state.PivotAngle);
+  return this.runOnce(() -> {
+
+    setPivotSetpoint(state.PivotAngle);
+    setVelocitySetpoint(state.RollerSpeed);
+
+    if (RobotBase.isSimulation() && intakeSim != null) {
 
       switch (state) {
-        case INTAKING, OUTTAKING, HOLDING ->
-          setVelocitySetpoint(state.RollerSpeed);
-
-        default ->
-          setVelocitySetpoint(RPM.of(0));
+        case INTAKING -> intakeSim.startIntake();
+        case OUTTAKING -> intakeSim.stopIntake();
+        case HOLDING, STOWED -> intakeSim.stopIntake();
       }
-    });
+    }
+  });
+}
+
+
+  public int getGamePieceCount() {
+    if (RobotBase.isSimulation() && intakeSim != null) {
+      return intakeSim.getGamePiecesAmount();
+    } else {
+      return 0; 
+
+    }
+  }
+
+  public boolean hasGamePiece() {
+    return getGamePieceCount() > 0;
   }
 
   @Override
