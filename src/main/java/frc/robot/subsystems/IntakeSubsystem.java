@@ -54,8 +54,21 @@ public class IntakeSubsystem extends SubsystemBase {
     return INSTANCE;
   }
 
+  SwerveSubsystem swerveSubsystem = SwerveSubsystem.getInstance();
+
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
+    if (RobotBase.isSimulation()) {
+      intakeSim = IntakeSimulation.OverTheBumperIntake("Fuel",
+          swerveSubsystem.getSwerveDrive().getMapleSimDrive().get(), Constants.IntakeConstants.intakeWidth,
+          Constants.IntakeConstants.intakeExtensionLength, IntakeSimulation.IntakeSide.FRONT,
+          Constants.IntakeConstants.maxGamePieceCapacity);
+
+      intakeSim.register();
+    }
+    else{
+      intakeSim = null;
+    }
   }
 
   private SmartMotorControllerConfig pivotSmcConfig = new SmartMotorControllerConfig(this)
