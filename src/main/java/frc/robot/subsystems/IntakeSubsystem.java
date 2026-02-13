@@ -18,7 +18,6 @@ import static edu.wpi.first.units.Units.Volts;
 
 import swervelib.simulation.ironmaple.simulation.IntakeSimulation;
 
-
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SimSwerveDrivetrain;
@@ -76,17 +75,16 @@ public class IntakeSubsystem extends SubsystemBase {
           Constants.IntakeConstants.maxGamePieceCapacity);
 
       intakeSim.register();
-    }
-    else{
+    } else {
       intakeSim = null;
     }
   }
 
   private SmartMotorControllerConfig pivotSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+      .withClosedLoopController(0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
       .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withFeedforward(new ArmFeedforward(0, 0, 0))
+      .withFeedforward(new ArmFeedforward(0, 0.05, 0))
       .withSimFeedforward(new ArmFeedforward(0, 0, 0))
       .withTelemetry("Intake Pivot Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(Constants.IntakeConstants.intakePivotGearRatio)) // 12:1 Gear Ratio
@@ -104,6 +102,7 @@ public class IntakeSubsystem extends SubsystemBase {
       .withHardLimit(IntakePreset.Intake.position, IntakePreset.Stowed.position)
       .withStartingPosition(IntakePreset.Stowed.position)
       .withTelemetry("Intake Pivot", TelemetryVerbosity.HIGH)
+      .withStartingPosition(IntakePreset.Stowed.position)
       .withMOI(Constants.IntakeConstants.intakeCenterOfMassFromPivot, Constants.IntakeConstants.intakeMass);
 
   private Pivot intakePivot = new Pivot(pivotConfig);
@@ -168,28 +167,27 @@ public class IntakeSubsystem extends SubsystemBase {
 
   // Important Command to Set "State"
   public Command setState(IntakeState state) {
-  return this.runOnce(() -> {
+    return this.runOnce(() -> {
 
-    setPivotSetpoint(state.PivotAngle);
-    setVelocitySetpoint(state.RollerSpeed);
+      setPivotSetpoint(state.PivotAngle);
+      setVelocitySetpoint(state.RollerSpeed);
 
-    if (RobotBase.isSimulation() && intakeSim != null) {
+      if (RobotBase.isSimulation() && intakeSim != null) {
 
-      switch (state) {
-        case INTAKING -> intakeSim.startIntake();
-        case OUTTAKING -> intakeSim.stopIntake();
-        case HOLDING, STOWED -> intakeSim.stopIntake();
+        switch (state) {
+          case INTAKING -> intakeSim.startIntake();
+          case OUTTAKING -> intakeSim.stopIntake();
+          case HOLDING, STOWED -> intakeSim.stopIntake();
+        }
       }
-    }
-  });
-}
-
+    });
+  }
 
   public int getGamePieceCount() {
     if (RobotBase.isSimulation() && intakeSim != null) {
       return intakeSim.getGamePiecesAmount();
     } else {
-      return 0; 
+      return 0;
 
     }
   }
