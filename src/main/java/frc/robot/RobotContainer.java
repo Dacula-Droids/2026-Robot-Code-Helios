@@ -63,6 +63,8 @@ public class RobotContainer {
       driverXbox.a().onTrue(
           Commands.runOnce(() -> swerveSubsystem.swerveDrive.resetOdometry(new Pose2d(7.6, 1.178, new Rotation2d()))));
     }
+    
+    driverXbox.y().onTrue(intakeSubsystem.pivotTest());
 
     mechanismXbox.a().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.INTAKING));
     mechanismXbox.b().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.HOLDING));

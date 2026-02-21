@@ -132,9 +132,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private SmartMotorControllerConfig rollerSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withClosedLoopController(1, 0, 0)
+      .withClosedLoopController(0.002772, 0, 0.001)
       .withSimClosedLoopController(1, 0, 0)
-      .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
+      .withFeedforward(new SimpleMotorFeedforward(0, 0.12, 0))
       .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
       .withTelemetry("Intake Roller Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(Constants.IntakeConstants.intakeRollerGearRatio)) // 1:1 Gear Ratio
@@ -181,7 +181,16 @@ public class IntakeSubsystem extends SubsystemBase {
         }
       }
     });
+
+  
   }
+
+  public Command pivotTest(){
+    return this.runOnce(() -> {
+      setPivotSetpoint(IntakePreset.Test.position);
+    });
+  }
+  
 
   public int getGamePieceCount() {
     if (RobotBase.isSimulation() && intakeSim != null) {
