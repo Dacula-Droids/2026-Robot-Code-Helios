@@ -30,7 +30,8 @@ public class RobotContainer {
   private final IntakeSubsystem intakeSubsystem = IntakeSubsystem.getInstance();
 
   private final CommandXboxController driverXbox = new CommandXboxController(OperatorConstants.kDriverControllerPort);
-  private final CommandXboxController mechanismXbox = new CommandXboxController(OperatorConstants.kMechanismControllerPort);
+  private final CommandXboxController mechanismXbox = new CommandXboxController(
+      OperatorConstants.kMechanismControllerPort);
 
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(swerveSubsystem.getSwerveDrive(),
       () -> -driverXbox.getLeftY(),
@@ -75,7 +76,7 @@ public class RobotContainer {
       driverXbox.a().onTrue(
           Commands.runOnce(() -> swerveSubsystem.swerveDrive.resetOdometry(new Pose2d(7.6, 1.178, new Rotation2d()))));
     }
-    driverXbox.y().onTrue(intakeSubsystem.pivotTest());
+    driverXbox.y().onTrue(intakeSubsystem.intakePivotTest());
     mechanismXbox.a().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.INTAKING));
     mechanismXbox.b().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.HOLDING));
     mechanismXbox.y().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.OUTTAKING));
