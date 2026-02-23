@@ -4,7 +4,12 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
+
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
@@ -31,6 +36,7 @@ public final class Constants {
   public static class PhysicalConstants {
     public static final LinearVelocity kMaxSpeed = Units.MetersPerSecond.of(4.5);
   }
+
   public static class IntakeConstants {
     public static final int intakeMotorID = 31;
     public static final int pivotMotorID = 30;
@@ -43,5 +49,23 @@ public final class Constants {
     public static final Distance intakeWidth = Units.Inches.of(26.75);
     public static final Distance intakeExtensionLength = Units.Inches.of(13.8);
   }
-}
 
+  public static class IndexerConstants {
+    public static final int spinDexerMotorID = 32;
+    public static final int kickerMotorID = 33;
+    public static final double spinDexerGearRatio = 5;
+    public static final double kickerGearRatio = 10;
+    public static final AngularVelocity spinDexerVelocity = RPM.of(1000);
+    public static final AngularVelocity kickerVelocity = RPM.of(1000);
+  }
+
+  public static class ShooterConstants {
+    public static final int shooterFlywheelMotorID = 34;
+    public static final int shooterPitchMotorID = 35;
+    public static final int shooterThroughboreEncoderID = 36;
+    public static final double shooterFlywheelGearRatio = 1;
+    public static final double shooterPitchGearRatio = 2;
+    public static final Angle shooterThroughboreEncoderOffset = Degrees.of(33.25);
+
+  }
+}
