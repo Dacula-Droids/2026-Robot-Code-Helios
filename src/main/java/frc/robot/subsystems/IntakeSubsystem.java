@@ -181,23 +181,19 @@ public class IntakeSubsystem extends SubsystemBase {
         }
       }
     });
-
-  
   }
 
-  public Command pivotTest(){
+  public Command pivotTest() {
     return this.runOnce(() -> {
       setPivotSetpoint(IntakePreset.Test.position);
     });
   }
-  
 
   public int getGamePieceCount() {
     if (RobotBase.isSimulation() && intakeSim != null) {
       return intakeSim.getGamePiecesAmount();
     } else {
       return 0;
-
     }
   }
 
