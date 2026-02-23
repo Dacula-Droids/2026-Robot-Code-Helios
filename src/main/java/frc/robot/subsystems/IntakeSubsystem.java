@@ -3,133 +3,214 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.ResetMode;
-import com.revrobotics.PersistMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
+
+import swervelib.simulation.ironmaple.simulation.IntakeSimulation;
+
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.swerve.SimSwerveDrivetrain;
+import com.fasterxml.jackson.annotation.JsonGetter;
+
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Utils.Preset;
+import frc.robot.Utils.IntakeState;
+import frc.robot.Utils.IntakePreset;
+import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.motorcontrollers.remote.TalonFXWrapper;
+import yams.gearing.GearBox;
+import yams.gearing.MechanismGearing;
+import yams.mechanisms.config.FlyWheelConfig;
+import yams.mechanisms.config.PivotConfig;
+import yams.mechanisms.positional.Pivot;
+import yams.mechanisms.velocity.FlyWheel;
+import yams.motorcontrollers.SmartMotorControllerConfig;
+import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import lombok.Getter;
 
 public class IntakeSubsystem extends SubsystemBase {
-  /** Creates a new ExampleSubsystem. */
   private static IntakeSubsystem INSTANCE;
+  private TalonFX rollerMotor = new TalonFX(Constants.IntakeConstants.intakeMotorID, CANBus.roboRIO());
+  private TalonFX pivotMotor = new TalonFX(Constants.IntakeConstants.pivotMotorID, CANBus.roboRIO());
 
-  public static IntakeSubsystem getInstance(){
-    if(INSTANCE==null) {
+  @Getter
+  private final IntakeSimulation intakeSim;
+
+  @SuppressWarnings("WeakerAccess")
+  public static IntakeSubsystem getInstance() {
+    if (INSTANCE == null) {
       INSTANCE = new IntakeSubsystem();
     }
     return INSTANCE;
- 
   }
 
-  private SparkMax intakeMotor = new SparkMax(Constants.ArmConstants.kIntakeMotorId,MotorType.kBrushless);
-  private SparkMax endEffector = new SparkMax(Constants.ArmConstants.kEndEffectorMotorId,MotorType.kBrushless);
+  SwerveSubsystem swerveSubsystem = SwerveSubsystem.getInstance();
 
+  /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
-    MotorConfigs();
+    if (RobotBase.isSimulation()) {
+      intakeSim = IntakeSimulation.OverTheBumperIntake("Fuel",
+          swerveSubsystem.getSwerveDrive().getMapleSimDrive().get(), Constants.IntakeConstants.intakeWidth,
+          Constants.IntakeConstants.intakeExtensionLength, IntakeSimulation.IntakeSide.FRONT,
+          Constants.IntakeConstants.maxGamePieceCapacity);
 
+      intakeSim.register();
+    } else {
+      intakeSim = null;
+    }
   }
 
-  public void MotorConfigs(){
-    SparkMaxConfig endEffectorConfig = new SparkMaxConfig();
-    SparkMaxConfig intakeMotorConfig = new SparkMaxConfig();
+  private SmartMotorControllerConfig pivotSmcConfig = new SmartMotorControllerConfig(this)
+      .withControlMode(ControlMode.CLOSED_LOOP)
+      .withClosedLoopController(0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+      .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+      .withFeedforward(new ArmFeedforward(0, 0.05, 0))
+      .withSimFeedforward(new ArmFeedforward(0, 0, 0))
+      .withTelemetry("Intake Pivot Motor", TelemetryVerbosity.HIGH)
+      .withGearing(new MechanismGearing(Constants.IntakeConstants.intakePivotGearRatio)) // 12:1 Gear Ratio
+      .withMotorInverted(false)
+      .withIdleMode(MotorMode.BRAKE)
+      .withStatorCurrentLimit(Amps.of(40))
+      .withClosedLoopRampRate(Seconds.of(0.25))
+      .withOpenLoopRampRate(Seconds.of(0.25)); // PID Controller, Max Velocity, Max Acceleration;
 
-    endEffectorConfig.inverted(false).idleMode(IdleMode.kBrake);
-    endEffectorConfig.closedLoopRampRate(0.3);
-    endEffectorConfig.closedLoop.feedbackSensor(com.revrobotics.spark.FeedbackSensor.kPrimaryEncoder).pid(0.00002,0,0).outputRange(-1,1);
-    
+  private TalonFXWrapper pivotSmartMotorController = new TalonFXWrapper(pivotMotor, DCMotor.getKrakenX60(1),
+      pivotSmcConfig);
 
-   
-    endEffectorConfig.encoder.positionConversionFactor(14.4);
-    endEffectorConfig.encoder.velocityConversionFactor(0.24);
+  private PivotConfig pivotConfig = new PivotConfig(pivotSmartMotorController)
+      .withSoftLimits(IntakePreset.Intake.position, IntakePreset.Stowed.position)
+      .withHardLimit(IntakePreset.Intake.position, IntakePreset.Stowed.position)
+      .withStartingPosition(IntakePreset.Stowed.position)
+      .withTelemetry("Intake Pivot", TelemetryVerbosity.HIGH)
+      .withStartingPosition(IntakePreset.Stowed.position)
+      .withMOI(Constants.IntakeConstants.intakeCenterOfMassFromPivot, Constants.IntakeConstants.intakeMass);
 
-    intakeMotorConfig.inverted(false).idleMode(IdleMode.kCoast);
+  private Pivot intakePivot = new Pivot(pivotConfig);
 
-    //Bounds
-    endEffectorConfig.softLimit.forwardSoftLimit(Constants.ArmConstants.forwardSoftLimit);
-    endEffectorConfig.softLimit.reverseSoftLimit(Constants.ArmConstants.reverseSoftLimit);
-    endEffectorConfig.softLimit.forwardSoftLimitEnabled(true);
-    endEffectorConfig.softLimit.reverseSoftLimitEnabled(true);
-
-    
-
-    intakeMotor.configure(intakeMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    endEffector.configure(endEffectorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    
+  // Set angle of Intake, but command and Intake does not stop
+  public Command setAngle(Angle angle) {
+    return intakePivot.run(angle);
   }
 
-  public void moveIntake(Preset preset){
-    endEffector.getClosedLoopController().setSetpoint(preset.position, ControlType.kPosition);
+  // public Command setAngleAndStop(Angle angle){
+  // return intakePivot.runTo(angle);
+  // }
+
+  // Closed Loop controller for Intake
+  public void setPivotSetpoint(Angle angle) {
+    intakePivot.setMechanismPositionSetpoint(angle);
   }
 
-  public double getWristPosition(){
-    return endEffector.getEncoder().getPosition();
+  // dutycycle, incase open loop needed during testing
+  public Command setPivotDutyCycle(double dutycycle) {
+    return intakePivot.set(dutycycle);
   }
 
-  public void runIntake(){
-    intakeMotor.set(Constants.ArmConstants.intakeMotorSpeed);
+  public Command sysId() {
+    return intakePivot.sysId(Volts.of(7), Volts.of(2).per(Second), Seconds.of(4));
   }
 
-  public void joystickMoveIntake(double motorSpeed){
-  endEffector.getClosedLoopController().setSetpoint(motorSpeed, ControlType.kVelocity);
-  }
-  
-  public void stopIntake(){
-    intakeMotor.set(0);
-  }
+  private SmartMotorControllerConfig rollerSmcConfig = new SmartMotorControllerConfig(this)
+      .withControlMode(ControlMode.CLOSED_LOOP)
+      .withClosedLoopController(0.002772, 0, 0.001)
+      .withSimClosedLoopController(1, 0, 0)
+      .withFeedforward(new SimpleMotorFeedforward(0, 0.12, 0))
+      .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
+      .withTelemetry("Intake Roller Motor", TelemetryVerbosity.HIGH)
+      .withGearing(new MechanismGearing(Constants.IntakeConstants.intakeRollerGearRatio)) // 1:1 Gear Ratio
+      .withMotorInverted(false)
+      .withIdleMode(MotorMode.COAST)
+      .withStatorCurrentLimit(Amps.of(40));
 
-  public void runOutake(){
-    intakeMotor.set(Constants.ArmConstants.outakeMotorSpeed);
-  }
+  private TalonFXWrapper rollerSmartMotorController = new TalonFXWrapper(rollerMotor, DCMotor.getKrakenX60(1),
+      rollerSmcConfig);
 
+  private final FlyWheelConfig intakeRollerConfig = new FlyWheelConfig(rollerSmartMotorController)
+      .withDiameter(Inches.of(4))
+      .withMass(Pounds.of(0.21))
+      .withUpperSoftLimit(RPM.of(1000))
+      .withTelemetry("Roller Mechanism", TelemetryVerbosity.HIGH);
 
-  public boolean isIntakeAtPosition(Preset preset){
-  double target  = preset.position;
-  double current = endEffector.getEncoder().getPosition();
-  double tolerance = Constants.ArmConstants.endEffectorTolerance;
+  private FlyWheel intakeRoller = new FlyWheel(intakeRollerConfig);
 
-  return Math.abs(target - current) <= tolerance;
-
-  }
-
-  
-
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+  public Command setRollerVelocity(AngularVelocity speed) {
+    return intakeRoller.run(speed);
   }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+  public void setVelocitySetpoint(AngularVelocity speed) {
+    intakeRoller.setMechanismVelocitySetpoint(speed);
+  }
+
+  public Command setRollerDutyCycle(double dutycycle) {
+    return intakeRoller.set(dutycycle);
+  }
+
+  // Important Command to Set "State"
+  public Command setState(IntakeState state) {
+    return this.runOnce(() -> {
+
+      setPivotSetpoint(state.PivotAngle);
+      setVelocitySetpoint(state.RollerSpeed);
+
+      if (RobotBase.isSimulation() && intakeSim != null) {
+
+        switch (state) {
+          case INTAKING -> intakeSim.startIntake();
+          case OUTTAKING -> intakeSim.stopIntake();
+          case HOLDING, STOWED -> intakeSim.stopIntake();
+        }
+      }
+    });
+  }
+
+  public Command pivotTest() {
+    return this.runOnce(() -> {
+      setPivotSetpoint(IntakePreset.Test.position);
+    });
+  }
+
+  public int getGamePieceCount() {
+    if (RobotBase.isSimulation() && intakeSim != null) {
+      return intakeSim.getGamePiecesAmount();
+    } else {
+      return 0;
+    }
+  }
+
+  public boolean hasGamePiece() {
+    return getGamePieceCount() > 0;
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    intakePivot.updateTelemetry();
+    intakeRoller.updateTelemetry();
   }
 
   @Override
   public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
+    intakePivot.simIterate();
+    intakeRoller.simIterate();
   }
 }
