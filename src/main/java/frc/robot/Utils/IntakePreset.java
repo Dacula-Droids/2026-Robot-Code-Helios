@@ -5,8 +5,8 @@ import static edu.wpi.first.units.Units.Degrees;
 import edu.wpi.first.units.measure.Angle;
 
 public enum IntakePreset {
-    Intake(Degrees.of(-20)),
-    Test(Degrees.of(-50)),
+    Intake(Degrees.of(90)),
+    Test(Degrees.of(45)),
     Stowed(Degrees.of(0));
     
 

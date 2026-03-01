@@ -30,6 +30,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -85,11 +86,11 @@ public class IntakeSubsystem extends SubsystemBase {
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withClosedLoopController(0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
       .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withFeedforward(new ArmFeedforward(0, 0.05, 0))
+      .withFeedforward(new ArmFeedforward(0, 0.56, 0))
       .withSimFeedforward(new ArmFeedforward(0, 0, 0))
       .withTelemetry("Intake Pivot Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(Constants.IntakeConstants.intakePivotGearRatio)) // 12:1 Gear Ratio
-      .withMotorInverted(false)
+      .withMotorInverted(true)
       .withIdleMode(MotorMode.BRAKE)
       .withStatorCurrentLimit(Amps.of(40))
       .withClosedLoopRampRate(Seconds.of(0.25))
@@ -99,7 +100,7 @@ public class IntakeSubsystem extends SubsystemBase {
       pivotSmcConfig);
 
   private PivotConfig intakePivotConfig = new PivotConfig(pivotSmartMotorController)
-      .withSoftLimits(IntakePreset.Intake.position, IntakePreset.Stowed.position)
+      .withSoftLimits(Constants.IntakeConstants.lowerIntakeSoftLimit, Constants.IntakeConstants.upperIntakeSoftLimit)
       .withHardLimit(IntakePreset.Intake.position, IntakePreset.Stowed.position)
       .withStartingPosition(IntakePreset.Stowed.position)
       .withTelemetry("Intake Pivot", TelemetryVerbosity.HIGH)
@@ -138,7 +139,7 @@ public class IntakeSubsystem extends SubsystemBase {
       .withFeedforward(new SimpleMotorFeedforward(0, 0.12, 0))
       .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
       .withTelemetry("Intake Roller Motor", TelemetryVerbosity.HIGH)
-      .withGearing(new MechanismGearing(Constants.IntakeConstants.intakeRollerGearRatio)) // 1:1 Gear Ratio
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(Constants.IntakeConstants.intakePivotGearRatio))) // 1:1 Gear Ratio
       .withMotorInverted(false)
       .withIdleMode(MotorMode.COAST)
       .withStatorCurrentLimit(Amps.of(40));
@@ -190,12 +191,30 @@ public class IntakeSubsystem extends SubsystemBase {
     });
   }
 
+  public Command setIntakeAngle(){
+    return intakePivot.run(IntakePreset.Test.position);
+  }
+
+  public Command setIntakeZero(){
+    return intakePivot.run(IntakePreset.Stowed.position);
+  }
+
+  public Command intakePivotZero(){
+    return this.runOnce(() -> {
+      setIntakePivotSetpoint(IntakePreset.Stowed.position);
+    });
+  }
+
   public int getGamePieceCount() {
     if (RobotBase.isSimulation() && intakeSim != null) {
       return intakeSim.getGamePiecesAmount();
     } else {
       return 0;
     }
+  }
+
+  public void zeroPivotEncoder(){
+    intakePivotMotor.setPosition(0);
   }
 
   public boolean hasGamePiece() {
@@ -207,6 +226,7 @@ public class IntakeSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     intakePivot.updateTelemetry();
     intakeRoller.updateTelemetry();
+    SmartDashboard.putNumber("intake Pivot Angle Degrees", intakePivotMotor.getPosition().getValue().in(Degrees));
   }
 
   @Override
