@@ -12,10 +12,10 @@ public enum IntakeState {
 
     INTAKING(
             IntakePreset.Intake.position,
-            RPM.of(600)),
+            RPM.of(1000)),
 
     HOLDING(
-            IntakePreset.Intake.position,
+            IntakePreset.Test.position,
             RPM.of(150)),
 
     OUTTAKING(

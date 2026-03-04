@@ -17,15 +17,21 @@ import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
@@ -41,6 +47,16 @@ import yams.motorcontrollers.SmartMotorController;
 import com.ctre.phoenix6.hardware.CANcoder;
 
 public class ShooterSubsystem extends SubsystemBase {
+  private static ShooterSubsystem INSTANCE;
+
+   @SuppressWarnings("WeakerAccess")
+  public static ShooterSubsystem getInstance() {
+    if (INSTANCE == null) {
+      INSTANCE = new ShooterSubsystem();
+    }
+    return INSTANCE;
+  }
+
   // Motors
   private TalonFX shooterFlywheelMotor = new TalonFX(Constants.ShooterConstants.shooterFlywheelMotorID,
       CANBus.roboRIO());
@@ -50,17 +66,18 @@ public class ShooterSubsystem extends SubsystemBase {
   // SMC Configs
   private SmartMotorControllerConfig shooterFlywheelSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withClosedLoopController(0.002772, 0, 0.001, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+      .withClosedLoopController(0.18746-0.01, 0, 0.00, DegreesPerSecond.of(10000000), DegreesPerSecondPerSecond.of(100000)) //0.435, 0, 0.00
       .withSimClosedLoopController(1, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withFeedforward(new SimpleMotorFeedforward(0, 0.12, 0))
-      .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
+      .withFeedforward(new SimpleMotorFeedforward(0.38576, 0.12929, 0.032819)) //0.5, 0.149, 0
+      .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0)) 
       .withTelemetry("Shooter Flywheel Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(Constants.ShooterConstants.shooterFlywheelGearRatio)) // 1:1 Gear Ratio
       .withMotorInverted(false)
       .withIdleMode(MotorMode.COAST)
-      .withStatorCurrentLimit(Amps.of(40));
+      .withClosedLoopRampRate(Seconds.of(0.01))
+      .withStatorCurrentLimit(Amps.of(80));
 
-  private SmartMotorControllerConfig shooterPitchSmcConfig = new SmartMotorControllerConfig(this)
+     private SmartMotorControllerConfig shooterPitchSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withClosedLoopController(0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45)) // PID Controller,
                                                                                                     // Max Velocity, Max
@@ -90,8 +107,8 @@ public class ShooterSubsystem extends SubsystemBase {
   // FlyWheel Config
   private final FlyWheelConfig shooterFlyWheelConfig = new FlyWheelConfig(shooterFlywheelMotorController)
       .withDiameter(Inches.of(4))
-      .withMass(Pounds.of(0.3))
-      .withUpperSoftLimit(RPM.of(1000))
+      .withMass(Pounds.of(4.1))
+      .withSoftLimit(RPM.of(0),RPM.of(100000))
       .withTelemetry("Shooter Flywheel Mechanism", TelemetryVerbosity.HIGH);
 
   private PivotConfig shooterPitchConfig = new PivotConfig(shooterPitchMotorController)
@@ -107,6 +124,31 @@ public class ShooterSubsystem extends SubsystemBase {
   private FlyWheel shooterFlywheel = new FlyWheel(shooterFlyWheelConfig);
   private Pivot shooterPitch = new Pivot(shooterPitchConfig);
 
+  private final VoltageOut voltageRequest = new VoltageOut(0.0);
+  private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
+        new SysIdRoutine.Config(
+            null,                    // default quasistatic ramp = 1 V/s
+            Units.Volts.of(7),       // dynamic step voltage (lower = safer, prevents brownout)
+            null,                    // default timeout = 10 s
+            (state) -> SignalLogger.writeString("state", state.toString()) // required for SysId
+        ),
+        new SysIdRoutine.Mechanism(
+            (Voltage volts) -> shooterFlywheelMotor.setControl(voltageRequest.withOutput(volts.in(Units.Volts))),
+            null,                    // logging callback = null (Phoenix Signal Logger handles everything)
+            this                     // subsystem reference for logging
+        )
+    );
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return m_sysIdRoutine.quasistatic(direction);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return m_sysIdRoutine.dynamic(direction);
+  }
+  public void setVoltage(double volts) {
+    shooterFlywheelMotor.setControl(voltageRequest.withOutput(volts));
+  }
+
   // Commands
   public AngularVelocity getShooterFlywheelVelocity() {
     return shooterFlywheel.getSpeed();
@@ -120,14 +162,40 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterFlywheel.setMechanismVelocitySetpoint(speed);
   }
 
+  public Command sysId() { 
+  
+  // Our Static test will run the arm up and down with 7v.
+  // Our Dynamic test will run the arm up and down going from 0v to 7v inreasing at 2v per second.
+  // The test will last 4 seconds at most.
+  return shooterPitchSysId();
+  }
+
   public Command setShooterFlywheelDutyCycle(double dutyCycle) {
     return shooterFlywheel.set(dutyCycle);
   }
+
+  public void setShooterVoltage(double voltage){
+    shooterFlywheelMotor.setVoltage(voltage);
+  }
+
+  
+
 
   // DO NOT USE UNLESS YOU KNOW WHAT THIS DOES!
   public Command setPitchAngle(Angle angle) {
     return shooterPitch.run(angle);
   }
+
+
+
+// ... inside ShooterSubsystem ...
+
+public Command setFullSpeed() {
+    return this.run(() -> {
+        // 1.0 represents 100% output (full battery voltage)
+        shooterFlywheelMotor.setControl(new DutyCycleOut(1));
+    });
+}
 
   // USE THIS FOR CLOSED LOOP CONTROL AS MAIN METHOD FOR PITCH CONTROL
   public void setShooterPitchAngleSetpoint(Angle angle) {
@@ -139,7 +207,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command shooterPitchSysId() {
-    return shooterPitch.sysId(Volts.of(7), Volts.of(2).per(Second), Seconds.of(4)); // Arbitrary Values
+    return shooterFlywheel.sysId(Volts.of(7), Volts.of(2).per(Second), Seconds.of(8)); // Arbitrary Values
   }
 
   /** Creates a new ShooterSubsystem. */

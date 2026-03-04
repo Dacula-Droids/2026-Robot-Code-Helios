@@ -13,7 +13,6 @@ import static edu.wpi.first.units.Units.RPM;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -21,96 +20,76 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.remote.TalonFXWrapper;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
+import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorController;
+import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.motorcontrollers.remote.TalonFXWrapper;
 
-public class IndexerSubsystem extends SubsystemBase {
-  /** Creates a new IndexerSubsystem. */
+public class KickerSubsystem extends SubsystemBase {
+  /** Creates a new KickerSubsystem. */
+  private static KickerSubsystem INSTANCE;
 
-  private static IndexerSubsystem INSTANCE;
-
-   @SuppressWarnings("WeakerAccess")
-  public static IndexerSubsystem getInstance() {
+  @SuppressWarnings("WeakerAccess")
+  public static KickerSubsystem getInstance() {
     if (INSTANCE == null) {
-      INSTANCE = new IndexerSubsystem();
+      INSTANCE = new KickerSubsystem();
     }
     return INSTANCE;
   }
 
-  private TalonFX spinDexerMotor = new TalonFX(Constants.IndexerConstants.spinDexerMotorID, CANBus.roboRIO());
-  
+  private TalonFX kickerMotor = new TalonFX(Constants.IndexerConstants.kickerMotorID, CANBus.roboRIO());
 
-  // SMC Configs
-  private SmartMotorControllerConfig smcSpinDexerConfig = new SmartMotorControllerConfig(this)
+  private SmartMotorControllerConfig smcKickerConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
       .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
       .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
       .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
-      .withTelemetry("SpinDexer", TelemetryVerbosity.HIGH)
-      .withGearing(new MechanismGearing(Constants.IndexerConstants.spinDexerGearRatio))
+      .withTelemetry("Kicker", TelemetryVerbosity.HIGH)
+      .withGearing(new MechanismGearing(Constants.IndexerConstants.kickerGearRatio))
       .withMotorInverted(true)
       .withIdleMode(MotorMode.COAST)
       .withStatorCurrentLimit(Amps.of(40));
 
+  private SmartMotorController kickerSmartMotorController = new TalonFXWrapper(kickerMotor, DCMotor.getKrakenX60(1),
+      smcKickerConfig);
 
-  // Smart Motor Controller Wrappers
-  private SmartMotorController spinDexerSmartMotorController = new TalonFXWrapper(spinDexerMotor,
-      DCMotor.getKrakenX60(1),
-      smcSpinDexerConfig);
-
-
-  // FlyWheel Configs for Each Motor
-  private final FlyWheelConfig spinDexerFlywheelConfig = new FlyWheelConfig(spinDexerSmartMotorController)
+  private final FlyWheelConfig kickerFlywheelConfig = new FlyWheelConfig(kickerSmartMotorController)
       .withDiameter(Inches.of(2))
       .withMass(Pounds.of(0.3))
       .withUpperSoftLimit(RPM.of(2500))
       .withTelemetry("IndexerMech", TelemetryVerbosity.HIGH);
 
-
-  // Mechanisms
-  private FlyWheel spinDexer = new FlyWheel(spinDexerFlywheelConfig);
+  private FlyWheel kicker = new FlyWheel(kickerFlywheelConfig);
 
 
-  // Commands
-  public AngularVelocity getSpinDexerVelocity() {
-    return spinDexer.getSpeed();
+  public AngularVelocity getKickerVelocity() {
+    return kicker.getSpeed();
   }
 
-  public Command setSpinDexerVelocity(AngularVelocity speed) {
-    return spinDexer.run(speed);
+  public Command setKickerVelocity(AngularVelocity speed) {
+    return kicker.run(speed);
   }
 
-  public void setSpinDexerVelocitySetpoint(AngularVelocity speed) {
-    spinDexer.setMechanismVelocitySetpoint(speed);
+  public void setKickerVelocitySetpoint(AngularVelocity speed) {
+    kicker.setMechanismVelocitySetpoint(speed);
   }
 
-  public Command setSpinDexerDutyCycle(double dutyCycle) {
-    return spinDexer.set(dutyCycle);
+  public Command setKickerDutyCycle(double dutyCycle) {
+    return kicker.set(dutyCycle);
   }
 
-  public IndexerSubsystem() {
-
+  public KickerSubsystem() {
   }
 
   @Override
   public void periodic() {
-
     // This method will be called once per scheduler run
-    spinDexer.updateTelemetry();
-  
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    spinDexer.simIterate();
-    
+    kicker.updateTelemetry();
   }
 }

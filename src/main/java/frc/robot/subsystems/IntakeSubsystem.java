@@ -84,9 +84,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private SmartMotorControllerConfig pivotSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withClosedLoopController(0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+      .withClosedLoopController(170, 0, 1, DegreesPerSecond.of(375), DegreesPerSecondPerSecond.of(250))
       .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withFeedforward(new ArmFeedforward(0, 0.56, 0))
+      .withFeedforward(new ArmFeedforward(0.3, 0.25, 2))
       .withSimFeedforward(new ArmFeedforward(0, 0, 0))
       .withTelemetry("Intake Pivot Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(Constants.IntakeConstants.intakePivotGearRatio)) // 12:1 Gear Ratio
@@ -112,6 +112,10 @@ public class IntakeSubsystem extends SubsystemBase {
   // Set angle of Intake, but command and Intake does not stop
   public Command setIntakeAngle(Angle angle) {
     return intakePivot.run(angle);
+  }
+
+  public void setPivotVoltage(double voltage){
+    intakePivotMotor.setVoltage(voltage);
   }
 
   // public Command setAngleAndStop(Angle angle){
@@ -140,7 +144,7 @@ public class IntakeSubsystem extends SubsystemBase {
       .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
       .withTelemetry("Intake Roller Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(Constants.IntakeConstants.intakePivotGearRatio))) // 1:1 Gear Ratio
-      .withMotorInverted(false)
+      .withMotorInverted(true)
       .withIdleMode(MotorMode.COAST)
       .withStatorCurrentLimit(Amps.of(40));
 
@@ -214,7 +218,8 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void zeroPivotEncoder(){
-    intakePivotMotor.setPosition(0);
+    intakePivotMotor.setPosition(0.25); //Mechanism Rotations
+    
   }
 
   public boolean hasGamePiece() {
