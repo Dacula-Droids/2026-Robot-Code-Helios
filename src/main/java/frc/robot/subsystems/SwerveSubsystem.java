@@ -59,14 +59,17 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveSubsystem() {
     SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
     try {
-      swerveDrive = new SwerveParser(new File(Filesystem.getDeployDirectory(), "KrakenMk4iSwerveConfig")).createSwerveDrive(PhysicalConstants.kMaxSpeed.magnitude());
+      swerveDrive = new SwerveParser(new File(Filesystem.getDeployDirectory(), "KrakenMk4iSwerveConfig"))
+          .createSwerveDrive(PhysicalConstants.kMaxSpeed.magnitude());
       swerveController = swerveDrive.getSwerveController();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
-    swerveDrive.setCosineCompensator(false); //!SwerveDriveTelemetry.isSimulation) Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
-    //swerveDrive.pushOffsetsToEncoders();
+    swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via
+                                             // angle.
+    swerveDrive.setCosineCompensator(false); // !SwerveDriveTelemetry.isSimulation) Disables cosine compensation for
+                                             // simulations since it causes discrepancies not seen in real life.
+    // swerveDrive.pushOffsetsToEncoders();
     zeroGyro();
     setupPathPlanner();
   }
@@ -74,21 +77,20 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveDrive getSwerveDrive() {
     return swerveDrive;
   }
-  
-  public Command driveToPose(Pose2d pose){
-    PathConstraints pathConstraints = new PathConstraints(3, 3, 
-      Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+  public Command driveToPose(Pose2d pose) {
+    PathConstraints pathConstraints = new PathConstraints(3, 3,
+        Units.degreesToRadians(540), Units.degreesToRadians(720));
     return AutoBuilder.pathfindToPose(pose, pathConstraints, 0);
   }
 
-  //Pathfinding Method
+  // Pathfinding Method
   public Command pathfindToFieldTarget(FieldTarget fieldTarget, boolean isOffset) {
-      Pose3d tagPose = fieldTarget.getTargetPose();
-      Transform3d offset = FieldConstants.getFieldTargetOffset(fieldTarget, isOffset);
-      Pose2d goalPose = tagPose.plus(offset).toPose2d();
-      return driveToPose(goalPose);
+    Pose3d tagPose = fieldTarget.getTargetPose();
+    Transform3d offset = FieldConstants.getFieldTargetOffset(fieldTarget, isOffset);
+    Pose2d goalPose = tagPose.plus(offset).toPose2d();
+    return driveToPose(goalPose);
   }
-
 
   private void setupPathPlanner() {
     // Load the RobotConfig from the GUI settings. You should probably
@@ -169,11 +171,11 @@ public class SwerveSubsystem extends SubsystemBase {
     });
   }
 
-  public void zeroGyro(){
+  public void zeroGyro() {
     swerveDrive.zeroGyro();
   }
-  
-  public void zeroFieldOrientedHeading(SwerveInputStream swerveInputStream){
+
+  public void zeroFieldOrientedHeading(SwerveInputStream swerveInputStream) {
     swerveInputStream.translationHeadingOffset(true).translationHeadingOffset(swerveDrive.getOdometryHeading());
   }
 
