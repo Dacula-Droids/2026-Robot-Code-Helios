@@ -9,5 +9,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 /** Add your docs here. */
 public interface FieldTarget {
     int getAprilTagId();
+
     Pose3d getTargetPose();
 }
