@@ -114,7 +114,7 @@ public class IntakeSubsystem extends SubsystemBase {
     return intakePivot.run(angle);
   }
 
-  public void setPivotVoltage(double voltage){
+  public void setPivotVoltage(double voltage) {
     intakePivotMotor.setVoltage(voltage);
   }
 
@@ -143,7 +143,9 @@ public class IntakeSubsystem extends SubsystemBase {
       .withFeedforward(new SimpleMotorFeedforward(0, 0.12, 0))
       .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
       .withTelemetry("Intake Roller Motor", TelemetryVerbosity.HIGH)
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(Constants.IntakeConstants.intakePivotGearRatio))) // 1:1 Gear Ratio
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(Constants.IntakeConstants.intakePivotGearRatio))) // 1:1
+                                                                                                                      // Gear
+                                                                                                                      // Ratio
       .withMotorInverted(true)
       .withIdleMode(MotorMode.COAST)
       .withStatorCurrentLimit(Amps.of(40));
@@ -195,15 +197,15 @@ public class IntakeSubsystem extends SubsystemBase {
     });
   }
 
-  public Command setIntakeAngle(){
-    return intakePivot.run(IntakePreset.Test.position);
+  public Command setIntakeAngle() {
+    return intakePivot.run(IntakePreset.Intake.position);
   }
 
-  public Command setIntakeZero(){
+  public Command setIntakeZero() {
     return intakePivot.run(IntakePreset.Stowed.position);
   }
 
-  public Command intakePivotZero(){
+  public Command intakePivotZero() {
     return this.runOnce(() -> {
       setIntakePivotSetpoint(IntakePreset.Stowed.position);
     });
@@ -217,9 +219,9 @@ public class IntakeSubsystem extends SubsystemBase {
     }
   }
 
-  public void zeroPivotEncoder(){
-    intakePivotMotor.setPosition(0.25); //Mechanism Rotations
-    
+  public void zeroPivotEncoder() {
+    intakePivotMotor.setPosition(0.25); // Mechanism Rotations
+
   }
 
   public boolean hasGamePiece() {
