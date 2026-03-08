@@ -67,7 +67,6 @@ public class KickerSubsystem extends SubsystemBase {
 
   private FlyWheel kicker = new FlyWheel(kickerFlywheelConfig);
 
-
   public AngularVelocity getKickerVelocity() {
     return kicker.getSpeed();
   }
