@@ -36,6 +36,7 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
     public static final int kMechanismControllerPort = 1;
+    public static final int kButtonBoardControllerPort = 2;
     public static final double kSwerveControllerDeadband = 0.3;
   }
 
