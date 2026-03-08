@@ -30,6 +30,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -47,11 +48,12 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import lombok.Getter;
+import yams.motorcontrollers.SmartMotorController;
 
 public class IntakeSubsystem extends SubsystemBase {
   private static IntakeSubsystem INSTANCE;
   private TalonFX rollerMotor = new TalonFX(Constants.IntakeConstants.intakeMotorID, CANBus.roboRIO());
-  private TalonFX pivotMotor = new TalonFX(Constants.IntakeConstants.pivotMotorID, CANBus.roboRIO());
+  private TalonFX intakePivotMotor = new TalonFX(Constants.IntakeConstants.pivotMotorID, CANBus.roboRIO());
 
   @Getter
   private final IntakeSimulation intakeSim;
@@ -82,34 +84,38 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private SmartMotorControllerConfig pivotSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withClosedLoopController(0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+      .withClosedLoopController(170, 0, 1, DegreesPerSecond.of(375), DegreesPerSecondPerSecond.of(250))
       .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withFeedforward(new ArmFeedforward(0, 0.05, 0))
+      .withFeedforward(new ArmFeedforward(0.3, 0.25, 2))
       .withSimFeedforward(new ArmFeedforward(0, 0, 0))
       .withTelemetry("Intake Pivot Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(Constants.IntakeConstants.intakePivotGearRatio)) // 12:1 Gear Ratio
-      .withMotorInverted(false)
+      .withMotorInverted(true)
       .withIdleMode(MotorMode.BRAKE)
       .withStatorCurrentLimit(Amps.of(40))
       .withClosedLoopRampRate(Seconds.of(0.25))
       .withOpenLoopRampRate(Seconds.of(0.25)); // PID Controller, Max Velocity, Max Acceleration;
 
-  private TalonFXWrapper pivotSmartMotorController = new TalonFXWrapper(pivotMotor, DCMotor.getKrakenX60(1),
+  private SmartMotorController pivotSmartMotorController = new TalonFXWrapper(intakePivotMotor, DCMotor.getKrakenX60(1),
       pivotSmcConfig);
 
-  private PivotConfig pivotConfig = new PivotConfig(pivotSmartMotorController)
-      .withSoftLimits(IntakePreset.Intake.position, IntakePreset.Stowed.position)
+  private PivotConfig intakePivotConfig = new PivotConfig(pivotSmartMotorController)
+      .withSoftLimits(Constants.IntakeConstants.lowerIntakeSoftLimit, Constants.IntakeConstants.upperIntakeSoftLimit)
       .withHardLimit(IntakePreset.Intake.position, IntakePreset.Stowed.position)
       .withStartingPosition(IntakePreset.Stowed.position)
       .withTelemetry("Intake Pivot", TelemetryVerbosity.HIGH)
       .withStartingPosition(IntakePreset.Stowed.position)
       .withMOI(Constants.IntakeConstants.intakeCenterOfMassFromPivot, Constants.IntakeConstants.intakeMass);
 
-  private Pivot intakePivot = new Pivot(pivotConfig);
+  private Pivot intakePivot = new Pivot(intakePivotConfig);
 
   // Set angle of Intake, but command and Intake does not stop
-  public Command setAngle(Angle angle) {
+  public Command setIntakeAngle(Angle angle) {
     return intakePivot.run(angle);
+  }
+
+  public void setPivotVoltage(double voltage){
+    intakePivotMotor.setVoltage(voltage);
   }
 
   // public Command setAngleAndStop(Angle angle){
@@ -117,12 +123,12 @@ public class IntakeSubsystem extends SubsystemBase {
   // }
 
   // Closed Loop controller for Intake
-  public void setPivotSetpoint(Angle angle) {
+  public void setIntakePivotSetpoint(Angle angle) {
     intakePivot.setMechanismPositionSetpoint(angle);
   }
 
   // dutycycle, incase open loop needed during testing
-  public Command setPivotDutyCycle(double dutycycle) {
+  public Command setIntakePivotDutyCycle(double dutycycle) {
     return intakePivot.set(dutycycle);
   }
 
@@ -132,17 +138,17 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private SmartMotorControllerConfig rollerSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withClosedLoopController(0.002772, 0, 0.001)
-      .withSimClosedLoopController(1, 0, 0)
+      .withClosedLoopController(0.002772, 0, 0.001, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+      .withSimClosedLoopController(1, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
       .withFeedforward(new SimpleMotorFeedforward(0, 0.12, 0))
       .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
       .withTelemetry("Intake Roller Motor", TelemetryVerbosity.HIGH)
-      .withGearing(new MechanismGearing(Constants.IntakeConstants.intakeRollerGearRatio)) // 1:1 Gear Ratio
-      .withMotorInverted(false)
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(Constants.IntakeConstants.intakePivotGearRatio))) // 1:1 Gear Ratio
+      .withMotorInverted(true)
       .withIdleMode(MotorMode.COAST)
       .withStatorCurrentLimit(Amps.of(40));
 
-  private TalonFXWrapper rollerSmartMotorController = new TalonFXWrapper(rollerMotor, DCMotor.getKrakenX60(1),
+  private SmartMotorController rollerSmartMotorController = new TalonFXWrapper(rollerMotor, DCMotor.getKrakenX60(1),
       rollerSmcConfig);
 
   private final FlyWheelConfig intakeRollerConfig = new FlyWheelConfig(rollerSmartMotorController)
@@ -157,7 +163,7 @@ public class IntakeSubsystem extends SubsystemBase {
     return intakeRoller.run(speed);
   }
 
-  public void setVelocitySetpoint(AngularVelocity speed) {
+  public void setRollerVelocitySetpoint(AngularVelocity speed) {
     intakeRoller.setMechanismVelocitySetpoint(speed);
   }
 
@@ -169,8 +175,8 @@ public class IntakeSubsystem extends SubsystemBase {
   public Command setState(IntakeState state) {
     return this.runOnce(() -> {
 
-      setPivotSetpoint(state.PivotAngle);
-      setVelocitySetpoint(state.RollerSpeed);
+      setIntakePivotSetpoint(state.PivotAngle);
+      setRollerVelocitySetpoint(state.RollerSpeed);
 
       if (RobotBase.isSimulation() && intakeSim != null) {
 
@@ -183,9 +189,23 @@ public class IntakeSubsystem extends SubsystemBase {
     });
   }
 
-  public Command pivotTest() {
+  public Command intakePivotTest() {
     return this.runOnce(() -> {
-      setPivotSetpoint(IntakePreset.Test.position);
+      setIntakePivotSetpoint(IntakePreset.Test.position);
+    });
+  }
+
+  public Command setIntakeAngle(){
+    return intakePivot.run(IntakePreset.Test.position);
+  }
+
+  public Command setIntakeZero(){
+    return intakePivot.run(IntakePreset.Stowed.position);
+  }
+
+  public Command intakePivotZero(){
+    return this.runOnce(() -> {
+      setIntakePivotSetpoint(IntakePreset.Stowed.position);
     });
   }
 
@@ -197,6 +217,11 @@ public class IntakeSubsystem extends SubsystemBase {
     }
   }
 
+  public void zeroPivotEncoder(){
+    intakePivotMotor.setPosition(0.25); //Mechanism Rotations
+    
+  }
+
   public boolean hasGamePiece() {
     return getGamePieceCount() > 0;
   }
@@ -206,6 +231,7 @@ public class IntakeSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     intakePivot.updateTelemetry();
     intakeRoller.updateTelemetry();
+    SmartDashboard.putNumber("intake Pivot Angle Degrees", intakePivotMotor.getPosition().getValue().in(Degrees));
   }
 
   @Override
