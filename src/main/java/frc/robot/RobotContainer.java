@@ -80,37 +80,77 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+
+  private void configureAutonomous() {
+    DriverStation.silenceJoystickConnectionWarning(true);
+
+    Command goToLeftOutpostAndShoot = new SequentialCommandGroup(
+        swerveSubsystem.pathfindToFieldTarget(OutpostTarget.Left, true), Commands.waitSeconds(3),
+        getShootingCommand());
+
+    Command goToRightOutpostAndShoot = new SequentialCommandGroup(
+        swerveSubsystem.pathfindToFieldTarget(OutpostTarget.Right, true), Commands.waitSeconds(3),
+        getShootingCommand());
+
+    autoChooser.setDefaultOption("GoToLeftOutpostAndShoot", goToLeftOutpostAndShoot);
+    autoChooser.addOption("GoToRightOutpostAndShoot", goToRightOutpostAndShoot);
+
+    SmartDashboard.putData("Auto Routine", autoChooser);
+  }
+
   private void configureBindings() {
     Command driveFieldOrientedAnglularVelocity = swerveSubsystem.driveFieldOriented(driveAngularVelocity);
     Command driveRobotOrientedAnglularVelocity = swerveSubsystem.driveFieldOriented(driveRobotOrientedAngularVelocity);
-    // driverXbox.b().onTrue(
-    //     Commands.runOnce(() -> swerveSubsystem.zeroFieldOrientedHeading(driveAngularVelocity), swerveSubsystem));
+
+    swerveSubsystem.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+    // Commands.runOnce(() ->
+    // swerveSubsystem.zeroFieldOrientedHeading(driveAngularVelocity),
+    // swerveSubsystem));
     // // swerveSubsystem.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     // swerveSubsystem.setDefaultCommand(driveRobotOrientedAnglularVelocity);
 
     // if (Robot.isSimulation()) {
-    //   driverXbox.a().onTrue(
-    //       Commands.runOnce(() -> swerveSubsystem.swerveDrive.resetOdometry(new Pose2d(7.6, 1.178, new Rotation2d()))));
+    // driverXbox.a().onTrue(
+    // Commands.runOnce(() -> swerveSubsystem.swerveDrive.resetOdometry(new
+    // Pose2d(7.6, 1.178, new Rotation2d()))));
     // }
     // driverXbox.y().whileTrue(intakeSubsystem.setState(IntakeState.STOWED));
     // driverXbox.x().whileTrue(intakeSubsystem.setState(IntakeState.INTAKING));
     // driverXbox.leftBumper().whileTrue(
-    //     new ParallelCommandGroup(
-    //         indexerSubsystem.setSpinDexerDutyCycle(0.1)));
-            
-            //kickerSubsystem.setKickerDutyCycle(1),
-           // shooterSubsystem.setShooterFlywheelDutyCycle(1)));
+    // new ParallelCommandGroup(
+    // indexerSubsystem.setSpinDexerDutyCycle(0.1)));
+
+    // kickerSubsystem.setKickerDutyCycle(1),
+    // shooterSubsystem.setShooterFlywheelDutyCycle(1)));
     // driverXbox.rightBumper().whileTrue(intakeSubsystem.setRollerDutyCycle(0.2));
-    //7-(30*0.149)-0.5)
-    //driverXbox.rightBumper().whileTrue(Commands.runOnce(() -> shooterSubsystem.setShooterVoltage( ()));
-    driverXbox.rightBumper().whileTrue(Commands.runOnce(() -> shooterSubsystem.setShooterFlywheelVelocitySetpoint(RPM.of(6.65*187.978279242*1.425))));
+    // 7-(30*0.149)-0.5)
+    // driverXbox.rightBumper().whileTrue(Commands.runOnce(() ->
+    // shooterSubsystem.setShooterVoltage( ()));
+    driverXbox.rightBumper().onTrue(getShootingCommand());
+    driverXbox.leftBumper().onTrue(stopShootingCommand());
+    driverXbox.rightTrigger().onTrue(intakeSubsystem.setRollerDutyCycle(0.35));
+    driverXbox.leftTrigger().onTrue(intakeSubsystem.setRollerDutyCycle(0));
+    driverXbox.x().whileTrue(driveRobotOrientedAnglularVelocity);
+    driverXbox.a().onTrue(driveFieldOrientedAnglularVelocity);
+    driverXbox.b().onTrue(Commands.runOnce(() -> swerveSubsystem.zeroFieldOrientedHeading(driveAngularVelocity)));
+    driverXbox.povLeft().whileTrue(intakeSubsystem.setIntakeAngle());
+    driverXbox.povUp().whileTrue(intakeSubsystem.setIntakeZero());
+
+    buttonPad.button(1).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.LeftBack, true));
+    buttonPad.button(2).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.LeftFront, true));
+    buttonPad.button(3).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.RightBack, true));
+    buttonPad.button(4).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.RightFront, true));
+    buttonPad.button(5).whileTrue(swerveSubsystem.pathfindToFieldTarget(ClimbTarget.Left, true));
+    buttonPad.button(6).whileTrue(swerveSubsystem.pathfindToFieldTarget(ClimbTarget.Right, true));
+    buttonPad.button(7).whileTrue(swerveSubsystem.pathfindToFieldTarget(OutpostTarget.Left, true));
+    buttonPad.button(8).whileTrue(swerveSubsystem.pathfindToFieldTarget(OutpostTarget.Right, true));
+
     // driverXbox.a().whileTrue(intakeSubsystem.setState(IntakeState.HOLDING));
     // driverXbox.y().whileTrue(shooterSubsystem.shooterPitchSysId());
-    mechanismXbox.a().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.INTAKING));
-    mechanismXbox.b().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.HOLDING));
-    mechanismXbox.y().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.OUTTAKING));
-    mechanismXbox.x().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.STOWED));
-
+    // mechanismXbox.a().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.INTAKING));
+    // mechanismXbox.b().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.HOLDING));
+    // mechanismXbox.y().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.OUTTAKING));
+    // mechanismXbox.x().onTrue(intakeSubsystem.setState(frc.robot.Utils.IntakeState.STOWED));
 
     // Start / Stop the Phoenix Signal Logger
     // driverXbox.leftBumper().onTrue(Commands.runOnce(SignalLogger::start));
