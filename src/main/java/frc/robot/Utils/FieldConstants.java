@@ -27,8 +27,8 @@ public class FieldConstants {
 
     // 2. ID LOOKUP CLASS
     public static class AprilTagIDs {
-        
-        //April Tag IDs
+
+        // April Tag IDs
         // Red Alliance
         public static final int RED_TRENCH_LEFT_FRONT_ID = 7;
         public static final int RED_TRENCH_LEFT_BACK_ID = 6;
@@ -38,7 +38,7 @@ public class FieldConstants {
         public static final int RED_CLIMB_RIGHT_ID = 15;
         public static final int RED_OUTPOST_LEFT_ID = 14;
         public static final int RED_OUTPOST_RIGHT_ID = 13;
-        
+
         // Blue Alliance
         public static final int BLUE_OUTPOST_LEFT_ID = 30;
         public static final int BLUE_OUTPOST_RIGHT_ID = 29;
@@ -48,7 +48,6 @@ public class FieldConstants {
         public static final int BLUE_TRENCH_RIGHT_BACK_ID = 17;
         public static final int BLUE_CLIMB_LEFT_ID = 32;
         public static final int BLUE_CLIMB_RIGHT_ID = 31;
-        
 
         public static int getAllianceOutpostLeftId() {
             var alliance = DriverStation.getAlliance();
@@ -128,42 +127,41 @@ public class FieldConstants {
 
     // 4. THE OFFSET CALCULATOR
     public static Transform3d getFieldTargetOffset(FieldTarget target, boolean isOffset) {
-        
+
         // --- OUTPOST OFFSETS ---
         if (target instanceof OutpostTarget) {
             // TUNE 0.45 BASED ON YOUR ROBOT'S BUMPER LENGTH!
-            double distance = isOffset ? 0.45 : 1.0; 
+            double distance = isOffset ? 0.45 : 1.0;
             return new Transform3d(
-                new Translation3d(distance, 0, 0),
-                new Rotation3d(0, 0, Math.PI) // Rotate 180 to face the tag
+                    new Translation3d(distance, 0, 0),
+                    new Rotation3d(0, 0, Math.PI) // Rotate 180 to face the tag
             );
-        } 
-        
+        }
+
         // --- TRENCH OFFSETS ---
         else if (target instanceof TrenchTarget) {
             TrenchTarget trenchTarget = (TrenchTarget) target;
-            double distance = isOffset ? 0.5 : 1.2; 
+            double distance = isOffset ? 0.5 : 1.2;
             double rotationAngle;
 
             if (trenchTarget == TrenchTarget.LeftFront || trenchTarget == TrenchTarget.RightFront) {
                 // Front targets: Face one direction (e.g., 180 degrees)
-                rotationAngle = Math.PI; 
+                rotationAngle = Math.PI;
             } else {
                 // Back targets: Face the EXACT OPPOSITE direction (0 degrees)
-                rotationAngle = 0.0; 
+                rotationAngle = 0.0;
             }
 
             return new Transform3d(
-                new Translation3d(distance, 0, 0),
-                new Rotation3d(0, 0, rotationAngle) 
-            );
+                    new Translation3d(distance, 0, 0),
+                    new Rotation3d(0, 0, rotationAngle));
         }
 
         else if (target instanceof ClimbTarget) {
-            double distance = isOffset ? 0.5 : 1.0; 
+            double distance = isOffset ? 0.5 : 1.0;
             return new Transform3d(
-                new Translation3d(distance, 0, 0),
-                new Rotation3d(0, 0, Math.PI) // Rotate 180 degrees to face the tag
+                    new Translation3d(distance, 0, 0),
+                    new Rotation3d(0, 0, Math.PI) // Rotate 180 degrees to face the tag
             );
         }
 
