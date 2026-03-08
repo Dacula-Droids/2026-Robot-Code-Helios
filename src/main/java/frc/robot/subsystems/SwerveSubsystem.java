@@ -74,6 +74,21 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveDrive getSwerveDrive() {
     return swerveDrive;
   }
+  
+  public Command driveToPose(Pose2d pose){
+    PathConstraints pathConstraints = new PathConstraints(3, 3, 
+      Units.degreesToRadians(540), Units.degreesToRadians(720));
+    return AutoBuilder.pathfindToPose(pose, pathConstraints, 0);
+  }
+
+  //Pathfinding Method
+  public Command pathfindToFieldTarget(FieldTarget fieldTarget, boolean isOffset) {
+      Pose3d tagPose = fieldTarget.getTargetPose();
+      Transform3d offset = FieldConstants.getFieldTargetOffset(fieldTarget, isOffset);
+      Pose2d goalPose = tagPose.plus(offset).toPose2d();
+      return driveToPose(goalPose);
+  }
+
 
   private void setupPathPlanner() {
     // Load the RobotConfig from the GUI settings. You should probably
