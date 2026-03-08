@@ -45,9 +45,13 @@ public class RobotContainer {
   private final ShooterSubsystem shooterSubsystem = ShooterSubsystem.getInstance();
   private final KickerSubsystem kickerSubsystem = KickerSubsystem.getInstance();
 
+  private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+
   private final CommandXboxController driverXbox = new CommandXboxController(OperatorConstants.kDriverControllerPort);
   private final CommandXboxController mechanismXbox = new CommandXboxController(
       OperatorConstants.kMechanismControllerPort);
+  private final CommandGenericHID buttonPad = new CommandGenericHID(
+      Constants.OperatorConstants.kButtonBoardControllerPort);
 
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(swerveSubsystem.getSwerveDrive(),
       () -> -driverXbox.getLeftY(),
@@ -186,6 +190,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Commands.none();
+    return autoChooser.getSelected();
   }
 }
