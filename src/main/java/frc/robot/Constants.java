@@ -47,7 +47,7 @@ public final class Constants {
   public static class IntakeConstants {
     public static final int intakeMotorID = 31;
     public static final int pivotMotorID = 30;
-    public static final double intakePivotGearRatio = 23.5714; // 25:1 Gear Ratio
+    public static final double intakePivotGearRatio = 5; // 5:1 Gear Ratio
     public static final double intakeRollerGearRatio = 1; // 6:7 Gear Ratio
     public static final Mass intakeMass = Units.Pounds.of(8.7342717); // 8.7342717 lbs
     public static final Distance intakeCenterOfMassFromPivot = Units.Inches.of(9);

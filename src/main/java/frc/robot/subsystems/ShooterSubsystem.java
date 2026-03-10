@@ -162,6 +162,8 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterFlywheel.setMechanismVelocitySetpoint(speed);
   }
 
+  
+
   public Command sysId() { 
   
   // Our Static test will run the arm up and down with 7v.

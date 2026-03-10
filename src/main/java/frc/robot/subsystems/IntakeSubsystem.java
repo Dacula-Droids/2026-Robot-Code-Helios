@@ -86,7 +86,7 @@ public class IntakeSubsystem extends SubsystemBase {
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withClosedLoopController(170, 0, 1, DegreesPerSecond.of(375), DegreesPerSecondPerSecond.of(250))
       .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withFeedforward(new ArmFeedforward(0.3, 0.25, 2))
+      .withFeedforward(new ArmFeedforward(0.3, 0.25, 2)) //0.3 ks, 0.25 kg, 2 kv
       .withSimFeedforward(new ArmFeedforward(0, 0, 0))
       .withTelemetry("Intake Pivot Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(Constants.IntakeConstants.intakePivotGearRatio)) // 12:1 Gear Ratio
