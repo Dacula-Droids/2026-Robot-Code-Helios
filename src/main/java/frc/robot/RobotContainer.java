@@ -181,7 +181,7 @@ public class RobotContainer {
   private Command getShootingCommand() {
     return Commands.parallel(
         shooterSubsystem
-            .run(() -> shooterSubsystem.setShooterFlywheelVelocitySetpoint(RPM.of(6.65 * 187.978279242 * 1.425))),
+            .runOnce(() -> shooterSubsystem.setShooterFlywheelVelocitySetpoint(RPM.of(6.65 * 187.978279242 * 1.425))),
         indexerSubsystem.setSpinDexerDutyCycle(0.5), kickerSubsystem.setKickerDutyCycle(1));
 
   }
@@ -189,7 +189,7 @@ public class RobotContainer {
   private Command stopShootingCommand() {
     return Commands.parallel(
         shooterSubsystem
-            .run(() -> shooterSubsystem.setShooterFlywheelVelocitySetpoint(RPM.of(0))),
+            .runOnce(() -> shooterSubsystem.setShooterFlywheelVelocitySetpoint(RPM.of(0))),
         indexerSubsystem.setSpinDexerDutyCycle(0), kickerSubsystem.setKickerDutyCycle(0));
 
   }

@@ -8,24 +8,24 @@ public enum ClimbTarget implements FieldTarget {
 
     Left(AprilTagIDs.getAllianceClimbLeftId(),
             FieldConstants.aprilTagFieldLayout.getTagPose(AprilTagIDs.getAllianceClimbLeftId()).get()) {
-        @Override
+        
         public int getAprilTagId() {
             return ApriltagId;
         }
 
-        @Override
+        
         public Pose3d getTargetPose() {
             return TargetPose;
         }
     },
     Right(AprilTagIDs.getAllianceClimbRightId(),
             FieldConstants.aprilTagFieldLayout.getTagPose(AprilTagIDs.getAllianceClimbRightId()).get()) {
-        @Override
+        
         public int getAprilTagId() {
             return ApriltagId;
         } // Capital T
 
-        @Override
+        
         public Pose3d getTargetPose() {
             return TargetPose;
         }

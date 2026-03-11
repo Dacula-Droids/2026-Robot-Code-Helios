@@ -212,6 +212,14 @@ public Command setFullSpeed() {
     return shooterFlywheel.sysId(Volts.of(7), Volts.of(2).per(Second), Seconds.of(8)); // Arbitrary Values
   }
 
+  public void setPitchVoltage(double voltage){
+    shooterPitchMotor.setVoltage(voltage);
+  }
+
+  public void zeroPitchEncoder(){
+    shooterPitchMotor.setPosition(0.25);
+  }
+
   /** Creates a new ShooterSubsystem. */
   public ShooterSubsystem() {
   }

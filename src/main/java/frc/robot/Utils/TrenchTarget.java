@@ -8,12 +8,12 @@ public enum TrenchTarget implements FieldTarget {
 
     LeftFront(AprilTagIDs.getAllianceTrenchLeftFrontId(),
             FieldConstants.aprilTagFieldLayout.getTagPose(AprilTagIDs.getAllianceTrenchLeftFrontId()).get()) {
-        @Override
+        
         public int getAprilTagId() {
             return ApriltagId;
         }
 
-        @Override
+        
         public Pose3d getTargetPose() {
             return TargetPose;
         }

@@ -8,16 +8,16 @@ public enum OutpostTarget implements FieldTarget {
     
     Left(AprilTagIDs.getAllianceOutpostLeftId(),
     FieldConstants.aprilTagFieldLayout.getTagPose(AprilTagIDs.getAllianceOutpostLeftId()).get()){
-        @Override
+        
         public int getAprilTagId(){ return ApriltagId; } 
-        @Override
+        
         public Pose3d getTargetPose(){ return TargetPose; }
     },
     Right(AprilTagIDs.getAllianceOutpostRightId(),
     FieldConstants.aprilTagFieldLayout.getTagPose(AprilTagIDs.getAllianceOutpostRightId()).get()){
-        @Override
+
         public int getAprilTagId(){ return ApriltagId; } // Capital T
-        @Override
+        
         public Pose3d getTargetPose(){ return TargetPose; }
     };
     
