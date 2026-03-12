@@ -41,7 +41,7 @@ public final class Constants {
   }
 
   public static class PhysicalConstants {
-    public static final LinearVelocity kMaxSpeed = Units.MetersPerSecond.of(4.5);
+    public static final LinearVelocity kMaxSpeed = Units.MetersPerSecond.of(7.5);
   }
 
   public static class IntakeConstants {
