@@ -51,6 +51,7 @@ public class Robot extends TimedRobot {
   public void robotInit(){
      DataLogManager.start();
      intakeSubsystem.zeroPivotEncoder();
+     
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Second;
@@ -28,6 +29,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -149,6 +151,8 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterFlywheelMotor.setControl(voltageRequest.withOutput(volts));
   }
 
+  
+
   // Commands
   public AngularVelocity getShooterFlywheelVelocity() {
     return shooterFlywheel.getSpeed();
@@ -162,6 +166,9 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterFlywheel.setMechanismVelocitySetpoint(speed);
   }
 
+  public void setFlywheelVelocityMPS(LinearVelocity mps){
+    this.setShooterFlywheelVelocitySetpoint(RPM.of(mps.in(MetersPerSecond) * 187.978279242 * 1.425));
+  }
   
 
   public Command sysId() { 

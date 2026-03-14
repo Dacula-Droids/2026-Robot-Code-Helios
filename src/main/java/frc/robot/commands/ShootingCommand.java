@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,9 +20,8 @@ public class ShootingCommand extends ParallelCommandGroup {
       KickerSubsystem kickerSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
     addCommands(
-        shooterSubsystem
-            .run(() -> shooterSubsystem.setShooterFlywheelVelocitySetpoint(RPM.of(6.65 * 187.978279242 * 1.425))),
-        indexerSubsystem.setSpinDexerDutyCycle(0.5),
+        shooterSubsystem.setShooterFlywheelDutyCycle(0.75), //.run(() -> shooterSubsystem.setShooterFlywheelVelocitySetpoint(RPM.of(8 * 187.978279242 * 1.425))),
+        indexerSubsystem.setSpinDexerDutyCycle(1),
         kickerSubsystem.setKickerDutyCycle(1));
   }
 

@@ -48,6 +48,9 @@ public class FieldConstants {
         public static final int BLUE_TRENCH_RIGHT_BACK_ID = 17;
         public static final int BLUE_CLIMB_LEFT_ID = 32;
         public static final int BLUE_CLIMB_RIGHT_ID = 31;
+        public static final int BLUE_HUB_ID = 26;
+        public static final int RED_HUB_ID = 10;
+
 
         public static int getAllianceOutpostLeftId() {
             var alliance = DriverStation.getAlliance();
@@ -113,6 +116,14 @@ public class FieldConstants {
             return BLUE_CLIMB_RIGHT_ID;
         }
 
+        public static int getAllianceHubId() {
+            var alliance = DriverStation.getAlliance();
+            if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
+                return RED_HUB_ID;
+            }
+            return BLUE_HUB_ID;
+        }
+
     }
 
     // 3. FIELD DIMENSIONS (2026 Rebuilt)
@@ -159,6 +170,14 @@ public class FieldConstants {
 
         else if (target instanceof ClimbTarget) {
             double distance = isOffset ? 0.5 : 1.0;
+            return new Transform3d(
+                    new Translation3d(distance, 0, 0),
+                    new Rotation3d(0, 0, Math.PI) // Rotate 180 degrees to face the tag
+            );
+        }
+
+        else if (target instanceof HubTarget) {
+            double distance = isOffset ? Units.inchesToMeters(60) : 1.0; //89 Inches
             return new Transform3d(
                     new Translation3d(distance, 0, 0),
                     new Rotation3d(0, 0, Math.PI) // Rotate 180 degrees to face the tag

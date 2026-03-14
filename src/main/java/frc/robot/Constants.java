@@ -35,19 +35,19 @@ import edu.wpi.first.units.measure.Mass;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
-    public static final int kMechanismControllerPort = 1;
-    public static final int kButtonBoardControllerPort = 2;
+    public static final int kMechanismControllerPort = 2;
+    public static final int kButtonBoardControllerPort = 1;
     public static final double kSwerveControllerDeadband = 0.3;
   }
 
   public static class PhysicalConstants {
-    public static final LinearVelocity kMaxSpeed = Units.MetersPerSecond.of(7.5);
+    public static final LinearVelocity kMaxSpeed = Units.MetersPerSecond.of(5);
   }
 
   public static class IntakeConstants {
     public static final int intakeMotorID = 31;
     public static final int pivotMotorID = 30;
-    public static final double intakePivotGearRatio = 5; // 5:1 Gear Ratio
+    public static final double intakePivotGearRatio = 18; // 18:1 Gear Ratio
     public static final double intakeRollerGearRatio = 1; // 6:7 Gear Ratio
     public static final Mass intakeMass = Units.Pounds.of(8.7342717); // 8.7342717 lbs
     public static final Distance intakeCenterOfMassFromPivot = Units.Inches.of(9);

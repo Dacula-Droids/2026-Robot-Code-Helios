@@ -84,9 +84,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private SmartMotorControllerConfig pivotSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withClosedLoopController(170, 0, 1, DegreesPerSecond.of(375), DegreesPerSecondPerSecond.of(250))
+      .withClosedLoopController(13, 0, 0, DegreesPerSecond.of(375), DegreesPerSecondPerSecond.of(250))//kP 170, 0, 1
       .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withFeedforward(new ArmFeedforward(0.3, 0.25, 2)) //0.3 ks, 0.25 kg, 2 kv
+      .withFeedforward(new ArmFeedforward(0.32, 0.23, 0)) //0.3 ks, 0.25 kg, 2 kv q2     //0.23 kg, 0.32 ks, 0 kv
       .withSimFeedforward(new ArmFeedforward(0, 0, 0))
       .withTelemetry("Intake Pivot Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(Constants.IntakeConstants.intakePivotGearRatio)) // 12:1 Gear Ratio
@@ -203,6 +203,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public Command setIntakeZero() {
     return intakePivot.run(IntakePreset.Stowed.position);
+  }
+
+  public Command setIntakeDefault(){
+    return intakePivot.run(IntakePreset.Test.position);
   }
 
   public Command intakePivotZero() {

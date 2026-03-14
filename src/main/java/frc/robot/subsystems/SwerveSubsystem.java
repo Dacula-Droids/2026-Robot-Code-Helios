@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import java.io.File;
 import java.util.function.Supplier;
 
@@ -16,11 +18,15 @@ import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.PhysicalConstants;
@@ -41,6 +47,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private static SwerveSubsystem INSTANCE;
   public final SwerveDrive swerveDrive;
   public final SwerveController swerveController;
+  //private final Field2d field = new Field2d();
 
   /**
    * Returns the Singleton instance of this SwerveSubsystem. This static method
@@ -70,8 +77,12 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.setCosineCompensator(false); // !SwerveDriveTelemetry.isSimulation) Disables cosine compensation for
                                              // simulations since it causes discrepancies not seen in real life.
     // swerveDrive.pushOffsetsToEncoders();
+    // swerveDrive.getGyro().setOffset(new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(180)));
     zeroGyro();
     setupPathPlanner();
+
+    
+    //SmartDashboard.putData("Field", field);
   }
 
   public SwerveDrive getSwerveDrive() {
@@ -99,7 +110,7 @@ public class SwerveSubsystem extends SubsystemBase {
     try {
       config = RobotConfig.fromGUISettings();
 
-      final boolean enableFeedforward = false;
+      final boolean enableFeedforward = true;
       // Configure AutoBuilder last
       AutoBuilder.configure(
           swerveDrive::getPose,
@@ -123,9 +134,9 @@ public class SwerveSubsystem extends SubsystemBase {
           new PPHolonomicDriveController(
               // PPHolonomicController is the built in path following controller for holonomic
               // drive trains
-              new PIDConstants(4.25, 0.0, 0),
+              new PIDConstants(3.25, 0.0, 0),
               // Translation PID constants
-              new PIDConstants(4.65, 0.0, 0)
+              new PIDConstants(1.9, 0.0, 0)
           // Rotation PID constants
           ),
           config,
@@ -181,6 +192,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // field.setRobotPose(swerveDrive.getPose());
     // This method will be called once per scheduler run
   }
 }
