@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 
@@ -114,8 +115,17 @@ public class RobotContainer {
         swerveSubsystem.pathfindToFieldTarget(OutpostTarget.Right, true), Commands.waitSeconds(3),
         getShootingCommand());
 
+    Command goToHubAndShoot = new SequentialCommandGroup(
+      swerveSubsystem.pathfindToFieldTarget(HubTarget.Center, true), 
+      startShootingCommand(), 
+      Commands.waitSeconds(2), 
+      getShootingCommand()
+    );
+
    // autoChooser.setDefaultOption("GoToLeftOutpostAndShoot", goToLeftOutpostAndShoot);
    // autoChooser.addOption("GoToRightOutpostAndShoot", goToRightOutpostAndShoot);
+
+   autoChooser.addOption("goToHubAndShoot", goToHubAndShoot);
     
     
     SmartDashboard.putData("Auto Routine", autoChooser);
@@ -127,7 +137,7 @@ public class RobotContainer {
     Command defaultIntakeAngle = intakeSubsystem.setIntakeDefault();
 
     swerveSubsystem.setDefaultCommand(driveRobotOrientedAnglularVelocity);
-    intakeSubsystem.setDefaultCommand(defaultIntakeAngle);
+    //intakeSubsystem.setDefaultCommand(defaultIntakeAngle);
     
     // Commands.runOnce(() ->
     // swerveSubsystem.zeroFieldOrientedHeading(driveAngularVelocity),
@@ -156,14 +166,15 @@ public class RobotContainer {
 
     driverXbox.rightBumper().onTrue(getShootingCommand());
     driverXbox.leftBumper().onTrue(stopShootingCommand());
-    driverXbox.rightTrigger().onTrue(intakeSubsystem.setRollerDutyCycle(-0.2535));
-    driverXbox.leftTrigger().onTrue(intakeSubsystem.setRollerDutyCycle(0));
-    //driverXbox.leftTrigger().whileTrue(Commands.runOnce(()->intakeSubsystem.setPivotVoltage(0.23)));
+    //driverXbox.rightTrigger().onTrue(getIntakingCommand());
+    //driverXbox.rightTrigger().onTrue(getIntakingCommand());
+    //driverXbox.leftTrigger().onTrue(stopIntakingCommand());
+    //driverXbox.rightTrigger().whileTrue(()->intakeSubsystem.setRollerVelocitySetpoint(RPM.of(2)));
     driverXbox.x().whileTrue(driveRobotOrientedAnglularVelocity);
     driverXbox.a().onTrue(driveFieldOrientedAnglularVelocity);
     driverXbox.b().onTrue(Commands.runOnce(() -> swerveSubsystem.zeroFieldOrientedHeading(driveAngularVelocity)));
-    driverXbox.povRight().onTrue(intakeSubsystem.setIntakeAngle());
-    driverXbox.povUp().onTrue(intakeSubsystem.setIntakeZero());
+    //driverXbox.povRight().onTrue(intakeSubsystem.setIntakeAngle());
+    //driverXbox.povUp().onTrue(intakeSubsystem.setIntakeZero());
     driverXbox.povDown().onTrue(startShootingCommand());
 
 
@@ -211,9 +222,21 @@ public class RobotContainer {
 
   }
 
+  private Command getIntakingCommand(){
+    return Commands.parallel(
+    intakeSubsystem.run(()-> intakeSubsystem.setRollerVelocitySetpoint(RPM.of(-75))), indexerSubsystem.setSpinDexerDutyCycle(0.8)
+    );
+  }
+
+  private Command stopIntakingCommand(){
+    return Commands.parallel(
+    intakeSubsystem.run(() -> intakeSubsystem.setRollerZero()), indexerSubsystem.setSpinDexerDutyCycle(0)
+    );
+  }
+
   public Command startShootingCommand(){
     return
-    shooterSubsystem.run(()->shooterSubsystem.setFlywheelVelocityMPS(MetersPerSecond.of(8.75)));
+    shooterSubsystem.runOnce(()->shooterSubsystem.setFlywheelVelocityMPS(MetersPerSecond.of(8.75)));
   }
 
   /**

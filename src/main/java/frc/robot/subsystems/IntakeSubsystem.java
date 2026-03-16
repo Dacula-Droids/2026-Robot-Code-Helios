@@ -138,9 +138,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private SmartMotorControllerConfig rollerSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withClosedLoopController(0.002772, 0, 0.001, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+      .withClosedLoopController(19, 0, 0.001, DegreesPerSecond.of(900000000), DegreesPerSecondPerSecond.of(450000000))
       .withSimClosedLoopController(1, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withFeedforward(new SimpleMotorFeedforward(0, 0.12, 0))
+      .withFeedforward(new SimpleMotorFeedforward(0, 1.2, 0))
       .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
       .withTelemetry("Intake Roller Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(Constants.IntakeConstants.intakePivotGearRatio))) // 1:1
@@ -171,6 +171,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public Command setRollerDutyCycle(double dutycycle) {
     return intakeRoller.set(dutycycle);
+  }
+
+  public void setRollerZero(){
+    rollerMotor.stopMotor();
   }
 
   // Important Command to Set "State"
