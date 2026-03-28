@@ -167,8 +167,8 @@ public class RobotContainer {
     driverXbox.rightBumper().onTrue(getShootingCommand());
     driverXbox.leftBumper().onTrue(stopShootingCommand());
     //driverXbox.rightTrigger().onTrue(getIntakingCommand());
-    //driverXbox.rightTrigger().onTrue(getIntakingCommand());
-    //driverXbox.leftTrigger().onTrue(stopIntakingCommand());
+    driverXbox.rightTrigger().onTrue(getIntakingCommand());
+    driverXbox.leftTrigger().onTrue(stopIntakingCommand());
     //driverXbox.rightTrigger().whileTrue(()->intakeSubsystem.setRollerVelocitySetpoint(RPM.of(2)));
     driverXbox.x().whileTrue(driveRobotOrientedAnglularVelocity);
     driverXbox.a().onTrue(driveFieldOrientedAnglularVelocity);
@@ -224,7 +224,7 @@ public class RobotContainer {
 
   private Command getIntakingCommand(){
     return Commands.parallel(
-    intakeSubsystem.run(()-> intakeSubsystem.setRollerVelocitySetpoint(RPM.of(-75))), indexerSubsystem.setSpinDexerDutyCycle(0.8)
+    intakeSubsystem.run(()-> intakeSubsystem.setRollerVelocitySetpoint(RPM.of(-90))), indexerSubsystem.setSpinDexerDutyCycle(0.8)
     );
   }
 
