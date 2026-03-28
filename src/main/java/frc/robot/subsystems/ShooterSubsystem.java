@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Second;
@@ -19,8 +20,10 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -28,6 +31,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -60,6 +64,7 @@ public class ShooterSubsystem extends SubsystemBase {
   // Motors
   private TalonFX shooterFlywheelMotor = new TalonFX(Constants.ShooterConstants.shooterFlywheelMotorID,
       CANBus.roboRIO());
+  private TalonFX shooterFollowerFlywheelMotor = new TalonFX(Constants.ShooterConstants.shooterFlywheelFollowerMotorID, CANBus.roboRIO());
   private TalonFX shooterPitchMotor = new TalonFX(Constants.ShooterConstants.shooterPitchMotorID, CANBus.roboRIO());
   private CANcoder pitchEncoder = new CANcoder(Constants.ShooterConstants.shooterThroughboreEncoderID);
 
@@ -149,6 +154,8 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterFlywheelMotor.setControl(voltageRequest.withOutput(volts));
   }
 
+  
+
   // Commands
   public AngularVelocity getShooterFlywheelVelocity() {
     return shooterFlywheel.getSpeed();
@@ -161,6 +168,11 @@ public class ShooterSubsystem extends SubsystemBase {
   public void setShooterFlywheelVelocitySetpoint(AngularVelocity speed) {
     shooterFlywheel.setMechanismVelocitySetpoint(speed);
   }
+
+  public void setFlywheelVelocityMPS(LinearVelocity mps){
+    this.setShooterFlywheelVelocitySetpoint(RPM.of(mps.in(MetersPerSecond) * 187.978279242 * 1.425));
+  }
+  
 
   public Command sysId() { 
   
@@ -210,8 +222,17 @@ public Command setFullSpeed() {
     return shooterFlywheel.sysId(Volts.of(7), Volts.of(2).per(Second), Seconds.of(8)); // Arbitrary Values
   }
 
+  public void setPitchVoltage(double voltage){
+    shooterPitchMotor.setVoltage(voltage);
+  }
+
+  public void zeroPitchEncoder(){
+    shooterPitchMotor.setPosition(0.25);
+  }
+
   /** Creates a new ShooterSubsystem. */
   public ShooterSubsystem() {
+    shooterFollowerFlywheelMotor.setControl(new Follower(Constants.ShooterConstants.shooterFlywheelMotorID, MotorAlignmentValue.Aligned));
   }
 
   @Override

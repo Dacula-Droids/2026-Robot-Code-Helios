@@ -7,6 +7,12 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -29,18 +35,19 @@ import edu.wpi.first.units.measure.Mass;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
-    public static final int kMechanismControllerPort = 1;
+    public static final int kMechanismControllerPort = 2;
+    public static final int kButtonBoardControllerPort = 1;
     public static final double kSwerveControllerDeadband = 0.3;
   }
 
   public static class PhysicalConstants {
-    public static final LinearVelocity kMaxSpeed = Units.MetersPerSecond.of(4.5);
+    public static final LinearVelocity kMaxSpeed = Units.MetersPerSecond.of(5);
   }
 
   public static class IntakeConstants {
     public static final int intakeMotorID = 31;
     public static final int pivotMotorID = 30;
-    public static final double intakePivotGearRatio = 23.5714; // 25:1 Gear Ratio
+    public static final double intakePivotGearRatio = 18; // 18:1 Gear Ratio
     public static final double intakeRollerGearRatio = 1; // 6:7 Gear Ratio
     public static final Mass intakeMass = Units.Pounds.of(8.7342717); // 8.7342717 lbs
     public static final Distance intakeCenterOfMassFromPivot = Units.Inches.of(9);
@@ -63,11 +70,18 @@ public final class Constants {
 
   public static class ShooterConstants {
     public static final int shooterFlywheelMotorID = 34;
-    public static final int shooterPitchMotorID = 35;
+    public static final int shooterPitchMotorID = 38;
+    public static final int shooterFlywheelFollowerMotorID = 35;
     public static final int shooterThroughboreEncoderID = 36;
     public static final double shooterFlywheelGearRatio = 1;
     public static final double shooterPitchGearRatio = 2;
     public static final Angle shooterThroughboreEncoderOffset = Degrees.of(33.25);
 
+  }
+
+  public static class VisionConstants{
+    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4,4,8);
+    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5,0.5,1);
+    public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   }
 }

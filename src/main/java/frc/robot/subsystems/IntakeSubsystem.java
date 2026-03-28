@@ -84,9 +84,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private SmartMotorControllerConfig pivotSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withClosedLoopController(170, 0, 1, DegreesPerSecond.of(375), DegreesPerSecondPerSecond.of(250))
+      .withClosedLoopController(13, 0, 0, DegreesPerSecond.of(375), DegreesPerSecondPerSecond.of(250))//kP 170, 0, 1
       .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withFeedforward(new ArmFeedforward(0.3, 0.25, 2))
+      .withFeedforward(new ArmFeedforward(0.32, 0.23, 0)) //0.3 ks, 0.25 kg, 2 kv q2     //0.23 kg, 0.32 ks, 0 kv
       .withSimFeedforward(new ArmFeedforward(0, 0, 0))
       .withTelemetry("Intake Pivot Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(Constants.IntakeConstants.intakePivotGearRatio)) // 12:1 Gear Ratio
@@ -114,7 +114,7 @@ public class IntakeSubsystem extends SubsystemBase {
     return intakePivot.run(angle);
   }
 
-  public void setPivotVoltage(double voltage){
+  public void setPivotVoltage(double voltage) {
     intakePivotMotor.setVoltage(voltage);
   }
 
@@ -138,12 +138,14 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private SmartMotorControllerConfig rollerSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withClosedLoopController(0.002772, 0, 0.001, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+      .withClosedLoopController(19, 0, 0.001, DegreesPerSecond.of(900000000), DegreesPerSecondPerSecond.of(450000000))
       .withSimClosedLoopController(1, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withFeedforward(new SimpleMotorFeedforward(0, 0.12, 0))
+      .withFeedforward(new SimpleMotorFeedforward(0, 1.2, 0))
       .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
       .withTelemetry("Intake Roller Motor", TelemetryVerbosity.HIGH)
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(Constants.IntakeConstants.intakePivotGearRatio))) // 1:1 Gear Ratio
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(Constants.IntakeConstants.intakePivotGearRatio))) // 1:1
+                                                                                                                      // Gear
+                                                                                                                      // Ratio
       .withMotorInverted(true)
       .withIdleMode(MotorMode.COAST)
       .withStatorCurrentLimit(Amps.of(40));
@@ -171,6 +173,10 @@ public class IntakeSubsystem extends SubsystemBase {
     return intakeRoller.set(dutycycle);
   }
 
+  public void setRollerZero(){
+    rollerMotor.stopMotor();
+  }
+
   // Important Command to Set "State"
   public Command setState(IntakeState state) {
     return this.runOnce(() -> {
@@ -195,15 +201,19 @@ public class IntakeSubsystem extends SubsystemBase {
     });
   }
 
-  public Command setIntakeAngle(){
-    return intakePivot.run(IntakePreset.Test.position);
+  public Command setIntakeAngle() {
+    return intakePivot.run(IntakePreset.Intake.position);
   }
 
-  public Command setIntakeZero(){
+  public Command setIntakeZero() {
     return intakePivot.run(IntakePreset.Stowed.position);
   }
 
-  public Command intakePivotZero(){
+  public Command setIntakeDefault(){
+    return intakePivot.run(IntakePreset.Test.position);
+  }
+
+  public Command intakePivotZero() {
     return this.runOnce(() -> {
       setIntakePivotSetpoint(IntakePreset.Stowed.position);
     });
@@ -217,9 +227,9 @@ public class IntakeSubsystem extends SubsystemBase {
     }
   }
 
-  public void zeroPivotEncoder(){
-    intakePivotMotor.setPosition(0.25); //Mechanism Rotations
-    
+  public void zeroPivotEncoder() {
+    intakePivotMotor.setPosition(0.25); // Mechanism Rotations
+
   }
 
   public boolean hasGamePiece() {

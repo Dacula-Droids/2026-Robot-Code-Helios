@@ -6,27 +6,27 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 public enum IntakeState {
-    STOWED(
-            IntakePreset.Stowed.position,
-            RPM.of(0)),
+        STOWED(
+                        IntakePreset.Stowed.position,
+                        RPM.of(0)),
 
-    INTAKING(
-            IntakePreset.Intake.position,
-            RPM.of(1000)),
+        INTAKING(
+                        IntakePreset.Intake.position,
+                        RPM.of(1000)),
 
-    HOLDING(
-            IntakePreset.Test.position,
-            RPM.of(150)),
+        HOLDING(
+                        IntakePreset.Test.position,
+                        RPM.of(150)),
 
-    OUTTAKING(
-            IntakePreset.Intake.position,
-            RPM.of(-600));
+        OUTTAKING(
+                        IntakePreset.Intake.position,
+                        RPM.of(-600));
 
-    public final Angle PivotAngle;
-    public final AngularVelocity RollerSpeed;
+        public final Angle PivotAngle;
+        public final AngularVelocity RollerSpeed;
 
-    private IntakeState(Angle pivotAngle, AngularVelocity rollerSpeed) {
-        this.PivotAngle = pivotAngle;
-        this.RollerSpeed = rollerSpeed;
-    }
+        private IntakeState(Angle pivotAngle, AngularVelocity rollerSpeed) {
+                this.PivotAngle = pivotAngle;
+                this.RollerSpeed = rollerSpeed;
+        }
 }
