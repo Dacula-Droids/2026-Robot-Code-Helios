@@ -70,7 +70,8 @@ public final class Constants {
 
   public static class ShooterConstants {
     public static final int shooterFlywheelMotorID = 34;
-    public static final int shooterPitchMotorID = 35;
+    public static final int shooterPitchMotorID = 38;
+    public static final int shooterFlywheelFollowerMotorID = 35;
     public static final int shooterThroughboreEncoderID = 36;
     public static final double shooterFlywheelGearRatio = 1;
     public static final double shooterPitchGearRatio = 2;

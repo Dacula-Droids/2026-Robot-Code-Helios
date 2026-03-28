@@ -20,8 +20,10 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -62,6 +64,7 @@ public class ShooterSubsystem extends SubsystemBase {
   // Motors
   private TalonFX shooterFlywheelMotor = new TalonFX(Constants.ShooterConstants.shooterFlywheelMotorID,
       CANBus.roboRIO());
+  private TalonFX shooterFollowerFlywheelMotor = new TalonFX(Constants.ShooterConstants.shooterFlywheelFollowerMotorID, CANBus.roboRIO());
   private TalonFX shooterPitchMotor = new TalonFX(Constants.ShooterConstants.shooterPitchMotorID, CANBus.roboRIO());
   private CANcoder pitchEncoder = new CANcoder(Constants.ShooterConstants.shooterThroughboreEncoderID);
 
@@ -229,6 +232,7 @@ public Command setFullSpeed() {
 
   /** Creates a new ShooterSubsystem. */
   public ShooterSubsystem() {
+    shooterFollowerFlywheelMotor.setControl(new Follower(Constants.ShooterConstants.shooterFlywheelMotorID, MotorAlignmentValue.Aligned));
   }
 
   @Override
