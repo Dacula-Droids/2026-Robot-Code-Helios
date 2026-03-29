@@ -84,15 +84,15 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private SmartMotorControllerConfig pivotSmcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withClosedLoopController(13, 0, 0, DegreesPerSecond.of(375), DegreesPerSecondPerSecond.of(250))//kP 170, 0, 1
+      .withClosedLoopController(37, 0, 0, DegreesPerSecond.of(375), DegreesPerSecondPerSecond.of(250))//kP 170, 0, 1
       .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withFeedforward(new ArmFeedforward(0.32, 0.23, 0)) //0.3 ks, 0.25 kg, 2 kv q2     //0.23 kg, 0.32 ks, 0 kv
+      .withFeedforward(new ArmFeedforward(0.06, 0.037, 0)) //0.3 ks, 0.25 kg, 2 kv q2     //0.23 kg, 0.32 ks, 0 kv
       .withSimFeedforward(new ArmFeedforward(0, 0, 0))
       .withTelemetry("Intake Pivot Motor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(Constants.IntakeConstants.intakePivotGearRatio)) // 12:1 Gear Ratio
-      .withMotorInverted(true)
+      .withMotorInverted(false)
       .withIdleMode(MotorMode.BRAKE)
-      .withStatorCurrentLimit(Amps.of(40))
+      .withStatorCurrentLimit(Amps.of(50))
       .withClosedLoopRampRate(Seconds.of(0.25))
       .withOpenLoopRampRate(Seconds.of(0.25)); // PID Controller, Max Velocity, Max Acceleration;
 
@@ -146,7 +146,7 @@ public class IntakeSubsystem extends SubsystemBase {
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(Constants.IntakeConstants.intakePivotGearRatio))) // 1:1
                                                                                                                       // Gear
                                                                                                                       // Ratio
-      .withMotorInverted(true)
+      .withMotorInverted(false)
       .withIdleMode(MotorMode.COAST)
       .withStatorCurrentLimit(Amps.of(40));
 

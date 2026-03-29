@@ -53,7 +53,7 @@ public class KickerSubsystem extends SubsystemBase {
       .withTelemetry("Kicker", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(Constants.IndexerConstants.kickerGearRatio))
       .withMotorInverted(true)
-      .withIdleMode(MotorMode.COAST)
+      .withIdleMode(MotorMode.BRAKE)
       .withStatorCurrentLimit(Amps.of(40));
 
   private SmartMotorController kickerSmartMotorController = new TalonFXWrapper(kickerMotor, DCMotor.getKrakenX60(1),
