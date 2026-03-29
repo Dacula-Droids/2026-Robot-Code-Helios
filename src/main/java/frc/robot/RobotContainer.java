@@ -14,6 +14,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -32,12 +33,14 @@ import frc.robot.Utils.IntakeState;
 import frc.robot.Utils.OutpostTarget;
 import frc.robot.Utils.TrenchTarget;
 import frc.robot.commands.IntakingPivot;
+import frc.robot.commands.MoveAndAimWhileShooting;
 import frc.robot.commands.TestPivot;
 import frc.robot.commands.ZeroPivot;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.KickerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.ShooterType;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import swervelib.SwerveInputStream;
@@ -78,6 +81,9 @@ public class RobotContainer {
       .allianceRelativeControl(false);
   SwerveInputStream driveRobotOrientedAngularVelocity = driveAngularVelocity.copy().robotRelative(true);
 
+  // public SwerveInputStream getDrivingSwerveInputStream(){
+  //   return driveAngularVelocity;
+  // }
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -109,17 +115,17 @@ public class RobotContainer {
 
     Command goToLeftOutpostAndShoot = new SequentialCommandGroup(
         swerveSubsystem.pathfindToFieldTarget(OutpostTarget.Left, true), Commands.waitSeconds(3),
-        getShootingCommand());
+        getKickerCommand());
 
     Command goToRightOutpostAndShoot = new SequentialCommandGroup(
         swerveSubsystem.pathfindToFieldTarget(OutpostTarget.Right, true), Commands.waitSeconds(3),
-        getShootingCommand());
+        getKickerCommand());
 
     Command goToHubAndShoot = new SequentialCommandGroup(
       swerveSubsystem.pathfindToFieldTarget(HubTarget.Center, true), 
       startShootingCommand(), 
       Commands.waitSeconds(2), 
-      getShootingCommand()
+      getKickerCommand()
     );
 
    // autoChooser.setDefaultOption("GoToLeftOutpostAndShoot", goToLeftOutpostAndShoot);
@@ -136,7 +142,7 @@ public class RobotContainer {
     Command driveRobotOrientedAnglularVelocity = swerveSubsystem.driveFieldOriented(driveRobotOrientedAngularVelocity);
     Command defaultIntakeAngle = intakeSubsystem.setIntakeDefault();
 
-    swerveSubsystem.setDefaultCommand(driveRobotOrientedAnglularVelocity);
+    // swerveSubsystem.setDefaultCommand(driveRobotOrientedAnglularVelocity);
     //intakeSubsystem.setDefaultCommand(defaultIntakeAngle);
     
     // Commands.runOnce(() ->
@@ -164,29 +170,41 @@ public class RobotContainer {
     // shooterSubsystem.setShooterVoltage( ()));
 
 
-    driverXbox.rightBumper().onTrue(getShootingCommand());
+    driverXbox.rightBumper().onTrue(getKickerCommand());
     driverXbox.leftBumper().onTrue(stopShootingCommand());
-    //driverXbox.rightTrigger().onTrue(getIntakingCommand());
-    driverXbox.rightTrigger().onTrue(getIntakingCommand());
-    driverXbox.leftTrigger().onTrue(stopIntakingCommand());
-    //driverXbox.rightTrigger().whileTrue(()->intakeSubsystem.setRollerVelocitySetpoint(RPM.of(2)));
+
+    // // //driverXbox.rightTrigger().onTrue(getIntakingCommand());
+
+       driverXbox.rightTrigger().onTrue(getIntakingCommand());
+    //  //driverXbox.rightTrigger().onTrue(intakeSubsystem.setIntakePivotDutyCycle(0.037)); //ks 0.06, kg 0.037
+       driverXbox.leftTrigger().onTrue(stopIntakingCommand());
+       driverXbox.povDown().onTrue(intakeSubsystem.setIntakeAngle());
+       driverXbox.povUp().onTrue(intakeSubsystem.setIntakeZero());
+
+    // driverXbox.rightTrigger().whileTrue(()->intakeSubsystem.setRollerVelocitySetpoint(RPM.of(2)));
+
     driverXbox.x().whileTrue(driveRobotOrientedAnglularVelocity);
     driverXbox.a().onTrue(driveFieldOrientedAnglularVelocity);
     driverXbox.b().onTrue(Commands.runOnce(() -> swerveSubsystem.zeroFieldOrientedHeading(driveAngularVelocity)));
-    //driverXbox.povRight().onTrue(intakeSubsystem.setIntakeAngle());
+    driverXbox.y().onTrue(startShootingCommand());
+
+    
+    
+     //driverXbox.povRight().onTrue(intakeSubsystem.setIntakeAngle());
     //driverXbox.povUp().onTrue(intakeSubsystem.setIntakeZero());
-    driverXbox.povDown().onTrue(startShootingCommand());
+   // driverXbox.povDown().onTrue(startShootingCommand());
 
 
-    //buttonPad.button(8).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.LeftBack, true));
-    //buttonPad.button(6).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.LeftFront, true));
-   // buttonPad.button(2).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.RightBack, true));
-    //buttonPad.button(1).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.RightFront, true));
-    //buttonPad.button(5).whileTrue(swerveSubsystem.pathfindToFieldTarget(ClimbTarget.Left, true));
-    //buttonPad.button(3).whileTrue(swerveSubsystem.pathfindToFieldTarget(ClimbTarget.Right, true));
-   // buttonPad.button(7).whileTrue(swerveSubsystem.pathfindToFieldTarget(OutpostTarget.Left, true));
-   // buttonPad.button(10).whileTrue(swerveSubsystem.pathfindToFieldTarget(OutpostTarget.Right, true));
-    buttonPad.button(4).whileTrue(swerveSubsystem.pathfindToFieldTarget(HubTarget.Center, true));
+  //    buttonPad.button(8).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.LeftBack, true));
+  //    buttonPad.button(6).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.LeftFront, true));
+  //    buttonPad.button(1).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.RightBack, true));
+  //    buttonPad.button(2).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.RightFront, true));
+  //   //buttonPad.button(5).whileTrue(swerveSubsystem.pathfindToFieldTarget(ClimbTarget.Left, true));
+  //   //buttonPad.button(3).whileTrue(swerveSubsystem.pathfindToFieldTarget(ClimbTarget.Right, true));
+  //    buttonPad.button(7).whileTrue(new MoveAndAimWhileShooting(() -> driverXbox.y().getAsBoolean(), driveAngularVelocity));
+  //  // buttonPad.button(10).whileTrue(swerveSubsystem.pathfindToFieldTarget(OutpostTarget.Right, true));
+  //   buttonPad.button(4).whileTrue(swerveSubsystem.pathfindToFieldTarget(HubTarget.Center, true));
+
 
 
 
@@ -208,11 +226,12 @@ public class RobotContainer {
     // driverXbox.x().whileTrue(shooterSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
   }
 
-  private Command getShootingCommand() {
+  private Command getKickerCommand() {
     return Commands.parallel(
         indexerSubsystem.setSpinDexerDutyCycle(1), kickerSubsystem.setKickerDutyCycle(1));
 
   }
+
 
   private Command stopShootingCommand() {
     return Commands.parallel(
@@ -224,7 +243,7 @@ public class RobotContainer {
 
   private Command getIntakingCommand(){
     return Commands.parallel(
-    intakeSubsystem.run(()-> intakeSubsystem.setRollerVelocitySetpoint(RPM.of(-90))), indexerSubsystem.setSpinDexerDutyCycle(0.8)
+    intakeSubsystem.run(()-> intakeSubsystem.setRollerVelocitySetpoint(RPM.of(-100))), indexerSubsystem.setSpinDexerDutyCycle(0.8)
     );
   }
 
@@ -234,10 +253,28 @@ public class RobotContainer {
     );
   }
 
-  public Command startShootingCommand(){
-    return
-    shooterSubsystem.runOnce(()->shooterSubsystem.setFlywheelVelocityMPS(MetersPerSecond.of(8.75)));
+  public Command startShootingCommand() {
+  return shooterSubsystem.run(() -> {
+    Pose2d currentPose = new Pose2d(4.6256-3, 4.0347, new Rotation2d());
+    var robotVelocity = new ChassisSpeeds();//swerveSubsystem.swerveDrive.getRobotVelocity(); 
+
+    var params = shooterSubsystem.getShotParams(currentPose, robotVelocity);
+
+    if (params.isPresent()) {
+      //Index one for the speed
+      double targetSpeedMPS = params.get()[1];
+      shooterSubsystem.setFlywheelVelocityMPS(MetersPerSecond.of(targetSpeedMPS));
+    }
+  });
   }
+
+  // public Command startShootingCommand(){
+  //   return shooterSubsystem.run(()-> {
+  //     shooterSubsystem.setFlywheelVelocityMPS(MetersPerSecond.of(7));
+  //     // shooterSubsystem.setShooterFlywheelVelocitySetpoint(RPM.of((6000)/2));
+  //     // shooterSubsystem.setShooterVoltage(0.19);
+  //   });
+  // }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
