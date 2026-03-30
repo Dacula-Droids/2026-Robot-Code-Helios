@@ -16,8 +16,10 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -47,6 +49,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private static SwerveSubsystem INSTANCE;
   public final SwerveDrive swerveDrive;
   public final SwerveController swerveController;
+  
   //private final Field2d field = new Field2d();
 
   /**
@@ -171,6 +174,12 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.driveFieldOriented(velocity);
   }
 
+  public Pose2d transtalePoseByLatency(Pose2d pose, ChassisSpeeds vel, double dt){
+    return new Pose2d(
+      pose.getX()+vel.vxMetersPerSecond*dt, 
+      pose.getY()+vel.vyMetersPerSecond*dt, 
+      pose.getRotation().plus(Rotation2d.fromRadians(vel.omegaRadiansPerSecond*dt)));
+  }
   /**
    * Drive the robot given a chassis field oriented velocity.
    *

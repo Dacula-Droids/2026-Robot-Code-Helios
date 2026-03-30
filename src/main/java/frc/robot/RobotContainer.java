@@ -79,6 +79,12 @@ public class RobotContainer {
       .deadband(OperatorConstants.kSwerveControllerDeadband)
       .scaleTranslation(0.75).scaleRotation(0.35)
       .allianceRelativeControl(false);
+   SwerveInputStream driveAngularVelocityNoHeading = SwerveInputStream.of(swerveSubsystem.getSwerveDrive(),
+      () -> -driverXbox.getLeftY(),
+      () -> -driverXbox.getLeftX())
+      .deadband(OperatorConstants.kSwerveControllerDeadband)
+      .scaleTranslation(0.25)
+      .allianceRelativeControl(false);
   SwerveInputStream driveRobotOrientedAngularVelocity = driveAngularVelocity.copy().robotRelative(true);
 
   // public SwerveInputStream getDrivingSwerveInputStream(){
@@ -142,7 +148,7 @@ public class RobotContainer {
     Command driveRobotOrientedAnglularVelocity = swerveSubsystem.driveFieldOriented(driveRobotOrientedAngularVelocity);
     Command defaultIntakeAngle = intakeSubsystem.setIntakeDefault();
 
-    // swerveSubsystem.setDefaultCommand(driveRobotOrientedAnglularVelocity);
+    swerveSubsystem.setDefaultCommand(driveRobotOrientedAnglularVelocity);
     //intakeSubsystem.setDefaultCommand(defaultIntakeAngle);
     
     // Commands.runOnce(() ->
@@ -186,24 +192,24 @@ public class RobotContainer {
     driverXbox.x().whileTrue(driveRobotOrientedAnglularVelocity);
     driverXbox.a().onTrue(driveFieldOrientedAnglularVelocity);
     driverXbox.b().onTrue(Commands.runOnce(() -> swerveSubsystem.zeroFieldOrientedHeading(driveAngularVelocity)));
-    driverXbox.y().onTrue(startShootingCommand());
+    //driverXbox.y().onTrue(startShootingCommand());
 
     
     
-     //driverXbox.povRight().onTrue(intakeSubsystem.setIntakeAngle());
-    //driverXbox.povUp().onTrue(intakeSubsystem.setIntakeZero());
-   // driverXbox.povDown().onTrue(startShootingCommand());
+    driverXbox.povRight().onTrue(intakeSubsystem.setIntakeAngle());
+    driverXbox.povUp().onTrue(intakeSubsystem.setIntakeZero());
+    driverXbox.povDown().onTrue(startShootingCommand());
 
 
-  //    buttonPad.button(8).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.LeftBack, true));
-  //    buttonPad.button(6).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.LeftFront, true));
-  //    buttonPad.button(1).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.RightBack, true));
-  //    buttonPad.button(2).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.RightFront, true));
+     buttonPad.button(8).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.LeftBack, true));
+     buttonPad.button(6).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.LeftFront, true));
+     buttonPad.button(1).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.RightBack, true));
+     buttonPad.button(2).whileTrue(swerveSubsystem.pathfindToFieldTarget(TrenchTarget.RightFront, true));
   //   //buttonPad.button(5).whileTrue(swerveSubsystem.pathfindToFieldTarget(ClimbTarget.Left, true));
   //   //buttonPad.button(3).whileTrue(swerveSubsystem.pathfindToFieldTarget(ClimbTarget.Right, true));
-  //    buttonPad.button(7).whileTrue(new MoveAndAimWhileShooting(() -> driverXbox.y().getAsBoolean(), driveAngularVelocity));
+  buttonPad.button(7).onTrue(new MoveAndAimWhileShooting(() -> driverXbox.y().getAsBoolean(), driveAngularVelocityNoHeading));
   //  // buttonPad.button(10).whileTrue(swerveSubsystem.pathfindToFieldTarget(OutpostTarget.Right, true));
-  //   buttonPad.button(4).whileTrue(swerveSubsystem.pathfindToFieldTarget(HubTarget.Center, true));
+  // buttonPad.button(4).whileTrue(swerveSubsystem.pathfindToFieldTarget(HubTarget.Center, true));
 
 
 
@@ -227,8 +233,8 @@ public class RobotContainer {
   }
 
   private Command getKickerCommand() {
-    return Commands.parallel(
-        indexerSubsystem.setSpinDexerDutyCycle(1), kickerSubsystem.setKickerDutyCycle(1));
+    return Commands.sequence(
+        kickerSubsystem.setKickerDutyCycle(-1).withTimeout(0.15), kickerSubsystem.setKickerDutyCycle(1));
 
   }
 
@@ -255,8 +261,8 @@ public class RobotContainer {
 
   public Command startShootingCommand() {
   return shooterSubsystem.run(() -> {
-    Pose2d currentPose = new Pose2d(4.6256-3, 4.0347, new Rotation2d());
-    var robotVelocity = new ChassisSpeeds();//swerveSubsystem.swerveDrive.getRobotVelocity(); 
+    Pose2d currentPose = swerveSubsystem.swerveDrive.getPose();// Pose2d currentPose = new Pose2d(4.6256-1.8542, 4.0347, new Rotation2d());
+    var robotVelocity = swerveSubsystem.swerveDrive.getRobotVelocity(); 
 
     var params = shooterSubsystem.getShotParams(currentPose, robotVelocity);
 

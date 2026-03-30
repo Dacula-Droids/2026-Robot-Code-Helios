@@ -179,7 +179,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void setFlywheelVelocityMPS(LinearVelocity mps){
-    this.setShooterFlywheelVelocitySetpoint(RPM.of(mps.in(MetersPerSecond) * 187.978279242 * 2.3));
+    this.setShooterFlywheelVelocitySetpoint(RPM.of(mps.in(MetersPerSecond) * 187.978279242 * 2.35));
   }
   
 
@@ -252,12 +252,12 @@ public Command setFullSpeed() {
   }
 
    // Should probably put these in a contansts file
-  Transform2d robotToExitTransform = new Transform2d(0,0, new Rotation2d());
+  Transform2d robotToExitTransform = new Transform2d(-0.1524,0, new Rotation2d());
   Distance FIELD_X = Units.Meters.of(16.513048); // Length of full field in the x
   Distance FIELD_Y = Units.Meters.of(8.042656); // Length of full field in the y
   Pose2d redAllianceOrigin = new Pose2d(FIELD_X.magnitude(), FIELD_Y.magnitude(), Rotation2d.fromDegrees(180));
-  Distance WALL_MARGIN = Units.Meters.of(1);
-  Distance HUB_MARGIN = Units.Meters.of(1);
+  Distance WALL_MARGIN = Units.Meters.of(0.1);
+  Distance HUB_MARGIN = Units.Meters.of(0.1);
 
   // Assumes that robotPose2d is given relative to blue alliance origin. If this is not the case, handle it.
   public Optional<double[]> getShotParams(Pose2d robotPose2d, ChassisSpeeds robotVelocity){
