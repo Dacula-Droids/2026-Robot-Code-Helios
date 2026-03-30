@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 
+
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -133,6 +134,14 @@ public class RobotContainer {
       Commands.waitSeconds(2), 
       getKickerCommand()
     );
+
+    NamedCommands.registerCommand("Intake Pivot Down", intakeSubsystem.setIntakeAngle());
+    NamedCommands.registerCommand("Intake Pivot Up", intakeSubsystem.setIntakeZero());
+    NamedCommands.registerCommand("Run Intake", getIntakingCommand());
+    NamedCommands.registerCommand("Stop Intake", stopIntakingCommand());
+    NamedCommands.registerCommand("Start Shooting", startShootingCommand());
+    NamedCommands.registerCommand("Start Kicker", getKickerCommand());
+    NamedCommands.registerCommand("Start Shooter", startShootingCommand());
 
    // autoChooser.setDefaultOption("GoToLeftOutpostAndShoot", goToLeftOutpostAndShoot);
    // autoChooser.addOption("GoToRightOutpostAndShoot", goToRightOutpostAndShoot);
