@@ -15,6 +15,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,6 +31,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.PhysicalConstants;
 import frc.robot.Utils.FieldConstants;
@@ -190,6 +192,21 @@ public class SwerveSubsystem extends SubsystemBase {
       swerveDrive.driveFieldOriented(velocity.get());
     });
   }
+
+  public Command driveToPoseThenFollow(String pathName){
+    PathPlannerPath path;
+    try{
+      path = PathPlannerPath.fromPathFile(pathName);
+    } catch (Exception e) {
+      DriverStation.reportError("Failed to load path: " + pathName, false);
+      return Commands.none();
+    }
+    PathConstraints pathConstraints = new PathConstraints(3, 3,
+        Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+    return AutoBuilder.pathfindThenFollowPath(path, pathConstraints);
+  }
+
 
   public void zeroGyro() {
     swerveDrive.zeroGyro();

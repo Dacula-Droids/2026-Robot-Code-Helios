@@ -142,7 +142,7 @@ public class FieldConstants {
         // --- OUTPOST OFFSETS ---
         if (target instanceof OutpostTarget) {
             // TUNE 0.45 BASED ON YOUR ROBOT'S BUMPER LENGTH!
-            double distance = isOffset ? 0.45 : 1.0;
+            double distance = isOffset ? Units.inchesToMeters(6) : 1.0;
             return new Transform3d(
                     new Translation3d(distance, 0, 0),
                     new Rotation3d(0, 0, Math.PI) // Rotate 180 to face the tag
@@ -152,7 +152,7 @@ public class FieldConstants {
         // --- TRENCH OFFSETS ---
         else if (target instanceof TrenchTarget) {
             TrenchTarget trenchTarget = (TrenchTarget) target;
-            double distance = isOffset ? 0.5 : 1.2;
+            double distance = isOffset ? Units.inchesToMeters(50) : 1.2;
             double rotationAngle;
 
             if (trenchTarget == TrenchTarget.LeftFront || trenchTarget == TrenchTarget.RightFront) {
@@ -169,7 +169,7 @@ public class FieldConstants {
         }
 
         else if (target instanceof ClimbTarget) {
-            double distance = isOffset ? 0.5 : 1.0;
+            double distance = isOffset ? Units.inchesToMeters(6) : 1.0;
             return new Transform3d(
                     new Translation3d(distance, 0, 0),
                     new Rotation3d(0, 0, Math.PI) // Rotate 180 degrees to face the tag
