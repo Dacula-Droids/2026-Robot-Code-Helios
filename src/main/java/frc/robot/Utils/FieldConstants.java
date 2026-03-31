@@ -1,12 +1,17 @@
 package frc.robot.Utils;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import java.io.IOException;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import frc.robot.Utils.FieldTarget;
 import frc.robot.Utils.OutpostTarget;
@@ -24,6 +29,10 @@ public class FieldConstants {
             throw new RuntimeException("Failed to load 2026 Field Layout", e);
         }
     }
+
+    public static final Distance FIELD_X = edu.wpi.first.units.Units.Meters.of(16.513048); // Length of full field in the x
+    public static final Distance FIELD_Y = edu.wpi.first.units.Units.Meters.of(8.042656); // Length of full field in the y
+     public static final Pose2d redAllianceOrigin = new Pose2d(FIELD_X.magnitude(), FIELD_Y.magnitude(), Rotation2d.fromDegrees(180));
 
     // 2. ID LOOKUP CLASS
     public static class AprilTagIDs {

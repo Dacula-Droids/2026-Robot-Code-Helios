@@ -46,6 +46,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.Utils.FieldConstants;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.config.PivotConfig;
@@ -253,9 +254,7 @@ public Command setFullSpeed() {
 
    // Should probably put these in a contansts file
   Transform2d robotToExitTransform = new Transform2d(-0.1524,0, new Rotation2d());
-  Distance FIELD_X = Units.Meters.of(16.513048); // Length of full field in the x
-  Distance FIELD_Y = Units.Meters.of(8.042656); // Length of full field in the y
-  Pose2d redAllianceOrigin = new Pose2d(FIELD_X.magnitude(), FIELD_Y.magnitude(), Rotation2d.fromDegrees(180));
+  
   Distance WALL_MARGIN = Units.Meters.of(0.1);
   Distance HUB_MARGIN = Units.Meters.of(0.1);
 
@@ -264,10 +263,10 @@ public Command setFullSpeed() {
     var alliance = DriverStation.getAlliance();
 
     //Convert robotPose2d and robotvelocity relative to red alllince if on red
-    // if (DriverStation.getAlliance().isPresent() && alliance.get() == Alliance.Red) {
-    //   robotPose2d = robotPose2d.relativeTo(redAllianceOrigin);
-    //   robotVelocity = new ChassisSpeeds(-robotVelocity.vxMetersPerSecond, -robotVelocity.vyMetersPerSecond, robotVelocity.omegaRadiansPerSecond);
-    // }
+    if (DriverStation.getAlliance().isPresent() && alliance.get() == Alliance.Red) {
+      robotPose2d = robotPose2d.relativeTo(FieldConstants.redAllianceOrigin);
+      robotVelocity = new ChassisSpeeds(-robotVelocity.vxMetersPerSecond, -robotVelocity.vyMetersPerSecond, robotVelocity.omegaRadiansPerSecond);
+    }
 
     // Checks if the pos is within the shooting area minus the wall and hub margins. 
     // This is highly recommended as it makes sure that you won't get bad outputs from the NN because of inputs outside or near the edge of the data it was trained on.

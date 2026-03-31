@@ -29,7 +29,7 @@ public class MoveAndAimWhileShooting extends Command {
   private final SwerveSubsystem swerveSubsystem = SwerveSubsystem.getInstance();
   private final ShooterSubsystem shooterSubsystem = ShooterSubsystem.getInstance();
 
-  final PIDController rotationalPidController = new PIDController(2.8+0.5, 0.00, 0);
+  // final PIDController rotationalPidController = new PIDController(2.8+0.5, 0.00, 0);
 
   /** Creates a new MoveAndAimWhileShooting. */
   public MoveAndAimWhileShooting(Supplier<Boolean> shouldShoot, SwerveInputStream drivingSwerveInputStream) {
@@ -43,19 +43,21 @@ public class MoveAndAimWhileShooting extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    rotationalPidController.enableContinuousInput(-180, 180);
-    rotationalPidController.setTolerance(3);
+    drivingSwerveInputStream.aimWhile(() -> true);
+    // rotationalPidController.enableContinuousInput(-180, 180);
+    // rotationalPidController.setTolerance(3);
   }
   
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    rotationalPidController.reset();
+    //rotationalPidController.reset();
 
     Pose2d robotPose = swerveSubsystem.swerveDrive.getPose();
     ChassisSpeeds robotVelocity = swerveSubsystem.swerveDrive.getRobotVelocity(); 
-    robotPose = swerveSubsystem.transtalePoseByLatency(robotPose, robotVelocity, 0.5);
+    ChassisSpeeds absoluteFieldRelativeChassisSpeeds = swerveSubsystem.getAbsoluteFieldRelativeChassisSpeeds(robotPose, robotVelocity);
+    robotPose = swerveSubsystem.transtalePoseByLatency(robotPose, robotVelocity, 0.2);
     Optional<double[]> shotParams = shooterSubsystem.getShotParams(robotPose, robotVelocity);
 
     if (shotParams.isPresent()) {
@@ -63,14 +65,16 @@ public class MoveAndAimWhileShooting extends Command {
       new Pose2d(robotPose.getTranslation(), Rotation2d.fromRadians(shotParams.get()[0]))
       .plus(new Transform2d(1,0, Rotation2d.fromRadians(0)));
       // System.out.println("SHOT PARAMS!!!!!!!!!!!!!!!!!!!::::: " + shotParams.get()[0]);
-      rotationalPidController.setSetpoint(Units.radiansToDegrees(shotParams.get()[0]));
-      //drivingSwerveInputStream.aim(aimTargetPose2d);
+      //rotationalPidController.setSetpoint(Units.radiansToDegrees(shotParams.get()[0]));
+
+      drivingSwerveInputStream.aim(aimTargetPose2d);
+      swerveSubsystem.swerveDrive.driveFieldOriented(drivingSwerveInputStream.get());
       
       
-      swerveSubsystem.swerveDrive.driveFieldOriented(
-        new ChassisSpeeds(drivingSwerveInputStream.get().vxMetersPerSecond, 
-        drivingSwerveInputStream.get().vyMetersPerSecond,
-         Units.degreesToRadians(rotationalPidController.calculate(robotPose.getRotation().getDegrees()))));
+      // swerveSubsystem.swerveDrive.driveFieldOriented(
+      //   new ChassisSpeeds(drivingSwerveInputStream.get().vxMetersPerSecond, 
+      //   drivingSwerveInputStream.get().vyMetersPerSecond,
+      //    Units.degreesToRadians(rotationalPidController.calculate(robotPose.getRotation().getDegrees()))));
 
       if (shouldShoot.get()){
         double targetSpeedMPS = shotParams.get()[1];

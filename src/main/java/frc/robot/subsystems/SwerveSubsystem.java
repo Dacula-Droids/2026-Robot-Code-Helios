@@ -27,6 +27,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -90,6 +91,25 @@ public class SwerveSubsystem extends SubsystemBase {
     //SmartDashboard.putData("Field", field);
   }
 
+  public ChassisSpeeds rotateVelocity(ChassisSpeeds chassisSpeeds, Rotation2d theta){
+    double newVx = chassisSpeeds.vxMetersPerSecond*Math.cos(theta.getRadians()) + chassisSpeeds.vyMetersPerSecond*Math.sin(theta.getRadians());
+    double newVy = chassisSpeeds.vxMetersPerSecond*Math.sin(theta.getRadians()) + chassisSpeeds.vyMetersPerSecond*Math.cos(theta.getRadians());
+    return new ChassisSpeeds(newVx, newVy, chassisSpeeds.omegaRadiansPerSecond);
+  }
+
+  public ChassisSpeeds getAbsoluteFieldRelativeChassisSpeeds(Pose2d robotPose, ChassisSpeeds robotRelativeSpeeds){
+    var alliance = DriverStation.getAlliance();
+
+    Rotation2d theta = robotPose.getRotation().times(-1);//Rotation2d.fromDegrees(-R);
+    //Convert robotPose2d and robotvelocity relative to red alllince if on red
+    if (DriverStation.getAlliance().isPresent() && alliance.get() == Alliance.Red) {
+      theta = (robotPose.getRotation().getDegrees() >= 0) ?  Rotation2d.fromDegrees(180).minus(robotPose.getRotation()) : Rotation2d.fromDegrees(-180).minus(robotPose.getRotation());
+    }
+
+    ChassisSpeeds absoluteRelativeChassisSpeeds = rotateVelocity(robotRelativeSpeeds, theta);
+    return absoluteRelativeChassisSpeeds;
+  }
+
   public SwerveDrive getSwerveDrive() {
     return swerveDrive;
   }
@@ -116,7 +136,7 @@ public class SwerveSubsystem extends SubsystemBase {
       config = RobotConfig.fromGUISettings();
 
       final boolean enableFeedforward = true;
-      // Configure AutoBuilder last
+      // Configure AutoBuilder last 
       AutoBuilder.configure(
           swerveDrive::getPose,
           // Robot pose supplier
