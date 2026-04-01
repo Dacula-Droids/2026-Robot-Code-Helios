@@ -195,9 +195,9 @@ public class IntakeSubsystem extends SubsystemBase {
     });
   }
 
-  public Command intakePivotTest() {
+  public Command intakePivotDown() {
     return this.runOnce(() -> {
-      setIntakePivotSetpoint(IntakePreset.Test.position);
+      setIntakePivotSetpoint(IntakePreset.Intake.position);
     });
   }
 

@@ -68,6 +68,13 @@ public class SwerveSubsystem extends SubsystemBase {
     return INSTANCE;
   }
 
+  public Pose2d getAllianceBasedPose(Pose2d pose2d){
+    var alliance = DriverStation.getAlliance();
+    if (DriverStation.getAlliance().isPresent() && alliance.get() == Alliance.Red) {
+      return pose2d.relativeTo(FieldConstants.redAllianceOrigin);
+    }
+    return pose2d;
+  }
   /** Creates a new SwerveSubsystem. */
   public SwerveSubsystem() {
     SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;

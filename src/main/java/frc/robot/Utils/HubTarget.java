@@ -6,7 +6,7 @@ import frc.robot.Utils.FieldConstants.AprilTagIDs;
 
 public enum HubTarget implements FieldTarget {
 
-    Center(AprilTagIDs.getAllianceClimbLeftId(),
+    Center(AprilTagIDs.getAllianceHubId(),
             FieldConstants.aprilTagFieldLayout.getTagPose(AprilTagIDs.getAllianceHubId()).get()) {
         
         public int getAprilTagId() {
