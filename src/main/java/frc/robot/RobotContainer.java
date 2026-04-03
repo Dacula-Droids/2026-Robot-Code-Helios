@@ -246,7 +246,7 @@ public class RobotContainer {
     driverXbox.x().whileTrue(driveRobotOrientedAnglularVelocity);
     driverXbox.a().onTrue(driveFieldOrientedAnglularVelocity);
     driverXbox.b().onTrue(Commands.runOnce(() -> swerveSubsystem.zeroFieldOrientedHeading(driveAngularVelocity)));
-    //driverXbox.y().onTrue(startShootingCommand());
+    driverXbox.y().onTrue(startShootingCommand());
 
     driverXbox.povRight().onTrue(intakeSubsystem.intakePivotDown());
     driverXbox.povUp().onTrue(intakeSubsystem.intakePivotZero());
@@ -302,7 +302,7 @@ public class RobotContainer {
   }
 
   private Command getIntakingCommand() {
-    return intakeSubsystem.runOnce(()-> intakeSubsystem.setRollerVelocitySetpoint(RPM.of(-107)));
+    return intakeSubsystem.runOnce(()-> intakeSubsystem.setRollerVelocitySetpoint(RPM.of(-275)));
   }
 
   private Command stopIntakingCommand() {
