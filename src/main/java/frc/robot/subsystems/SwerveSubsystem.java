@@ -228,7 +228,7 @@ public class SwerveSubsystem extends SubsystemBase {
       DriverStation.reportError("Failed to load path: " + pathName, false);
       return Commands.none();
     }
-    PathConstraints pathConstraints = new PathConstraints(1.5, 3,
+    PathConstraints pathConstraints = new PathConstraints(2, 4,
         Units.degreesToRadians(540), Units.degreesToRadians(720));
 
     return AutoBuilder.pathfindThenFollowPath(path, pathConstraints);

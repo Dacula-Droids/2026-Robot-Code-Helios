@@ -27,6 +27,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -277,6 +278,10 @@ public Command setFullSpeed() {
     //for ShooterType.FixedPitch_VarSpeed, returns: [heading, launch_speed]
     double[] shotParams = shooterNN.getShotParams(robotPose2d, robotVelocity, robotToExitTransform);
     double req_heading = shotParams[0];
+
+    if (DriverStation.getAlliance().isPresent() && alliance.get() == Alliance.Red) {
+      shotParams[0] = MathUtil.angleModulus(shotParams[0] + edu.wpi.first.math.util.Units.degreesToRadians(180));
+    }
 
 
     // If you don't have a Yaw controlled turret and are using your swerve drive to set your heading, 

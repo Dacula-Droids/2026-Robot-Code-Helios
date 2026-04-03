@@ -168,8 +168,8 @@ public class RobotContainer {
      }
    
     return new SequentialCommandGroup(
-
-        swerveSubsystem.pathfindToFieldTarget(HubTarget.Center, true),
+        swerveSubsystem.driveToPoseThenFollow("RightHubOffset"),
+        //swerveSubsystem.pathfindToFieldTarget(HubTarget.Center, true),
         new AimAtHub(driveAngularVelocityNoHeading),
         startShootingCommand(),
         Commands.waitSeconds(1.5),
@@ -189,6 +189,7 @@ public class RobotContainer {
         intakeSubsystem.intakePivotZero(),
 
         swerveSubsystem.driveToPoseThenFollow("RightTrenchPassBack"),
+        swerveSubsystem.driveToPoseThenFollow("RightHubOffset"),
         new AimAtHub(driveAngularVelocityNoHeading),
         startShootingCommand(),
         Commands.waitSeconds(1.5),

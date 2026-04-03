@@ -39,7 +39,7 @@ public class AimAtHub extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Pose2d robotPose = swerveSubsystem.getAllianceBasedPose(swerveSubsystem.swerveDrive.getPose());
+    Pose2d robotPose = swerveSubsystem.swerveDrive.getPose();//swerveSubsystem.getAllianceBasedPose(swerveSubsystem.swerveDrive.getPose());
     ChassisSpeeds robotVelocity = swerveSubsystem.swerveDrive.getRobotVelocity(); 
     ChassisSpeeds absoluteFieldRelativeChassisSpeeds = swerveSubsystem.getAbsoluteFieldRelativeChassisSpeeds(robotPose, robotVelocity);
     //robotPose = swerveSubsystem.transtalePoseByLatency(robotPose, robotVelocity, 0.1);
