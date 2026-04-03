@@ -47,7 +47,7 @@ public final class Constants {
   public static class IntakeConstants {
     public static final int intakeMotorID = 31;
     public static final int pivotMotorID = 30;
-    public static final double intakePivotGearRatio = 18; // 18:1 Gear Ratio
+    public static final double intakePivotGearRatio = 14.1428571429; // 9*24:14 Gear Ratio
     public static final double intakeRollerGearRatio = 1; // 6:7 Gear Ratio
     public static final Mass intakeMass = Units.Pounds.of(8.7342717); // 8.7342717 lbs
     public static final Distance intakeCenterOfMassFromPivot = Units.Inches.of(9);
@@ -55,7 +55,7 @@ public final class Constants {
     public static final Distance distanceFromRobotCenter = Units.Meters.of(0.3048);
     public static final Distance intakeWidth = Units.Inches.of(26.75);
     public static final Distance intakeExtensionLength = Units.Inches.of(13.8);
-    public static final Angle lowerIntakeSoftLimit = Degrees.of(-5);
+    public static final Angle lowerIntakeSoftLimit = Degrees.of(-10);
     public static final Angle upperIntakeSoftLimit = Degrees.of(100);
   }
 
@@ -63,7 +63,7 @@ public final class Constants {
     public static final int spinDexerMotorID = 32;
     public static final int kickerMotorID = 33;
     public static final double spinDexerGearRatio = 5;
-    public static final double kickerGearRatio = 10;
+    public static final double kickerGearRatio = 4;
     public static final AngularVelocity spinDexerVelocity = RPM.of(1000);
     public static final AngularVelocity kickerVelocity = RPM.of(1000);
   }
